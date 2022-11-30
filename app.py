@@ -115,13 +115,27 @@ def welcome(event):
         for i in group_id_table.find():
             if gid == i['_id']:
                 image_url = i['member_joined_figure']
-    print(image_url)
-    image_message = ImageSendMessage(
-        original_content_url=image_url,
-        preview_image_url=image_url
-    )
-    line_bot_api.reply_message(
-        event.reply_token, image_message)
+    urls = image_url.rsplit('.', 1)[1]
+    if urls == 'mp4':
+        try:
+            line_bot_api.reply_message(event.reply_token, VideoSendMessage(
+                original_content_url=image_url,  # 影片的網址，可以參考圖片的上傳方式
+                preview_image_url=image_url  # 影片預覽的圖片
+            ))
+        except:
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                text=f'上傳的圖片格式有誤，請輸入以下指令重新上傳:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png/.gif)及10MB以下影片檔(./mp4)\n'))
+    else:
+        try:
+            image_message = ImageSendMessage(
+                original_content_url=image_url,
+                preview_image_url=image_url
+            )
+            line_bot_api.reply_message(
+                event.reply_token, image_message)
+        except:
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                text=f'上傳的圖片格式有誤，請輸入以下指令重新上傳:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png)及10MB以下影片檔(./mp4)\n'))
 
 
 zodiacSigns_dict = {
@@ -213,7 +227,6 @@ def handle_message(event):
                 else:
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'此授權碼已註冊過'))
-                return '200'
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=f'已註冊過或不正確的授權碼'))
         return '200'
@@ -227,11 +240,11 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                    text=f'此功能關閉中...\n若要開啟請輸入:油價 開(ps.須具備管理員權限ㄛ!)'))
+                    text=f'❌查油價功能未開啟\n'))
                 return '200'
         else:
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
             return '200'
 
     elif "查匯率" in event.message.text:
@@ -243,11 +256,11 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                    text=f'此功能關閉中...\n若要開啟請輸入:匯率 開(ps.須具備管理員權限ㄛ!)'))
+                    text=f'❌查匯率功能未開啟'))
                 return '200'
         else:
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
             return '200'
 
     # 星座運勢
@@ -263,11 +276,11 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                    text=f'此功能關閉中...\n若要開啟請輸入:星座 開(ps.須具備管理員權限ㄛ!)'))
+                    text=f'❌星座查詢功能未開啟'))
                 return '200'
         else:
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
             return '200'
 
     # 天氣預報
@@ -283,26 +296,29 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                    text=f'此功能關閉中...\n若要開啟請輸入:天氣 開\n(ps.須具備管理員權限ㄛ!)'))
+                    text=f'❌天氣預報功能未開啟'))
                 return '200'
         else:
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
             return '200'
 
-    elif "查看管理員" in event.message.text:
+    elif "查管理員" in event.message.text:
         if group_enable(event.source.group_id):
             managers_list = []
-            group_managers_res = '本群管理員: '
+            group_managers_res = '◢◢◢本群管理員◣◣◣\n'
             managers_list = list_managers(event.source.group_id)
+            j = 0
             for i in managers_list:
-                group_managers_res += f'@{i} '
+                j = j + 1
+                group_managers_res += f'➛{j}. {i}\n'
+            group_managers_res += f'總共{j}個人'
             line_bot_api.reply_message(
                 event.reply_token, TextSendMessage(text=f'{group_managers_res}'))
             return '200'
         else:
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
             return '200'
 
     elif "油價 開" in event.message.text or "油價 關" in event.message.text:
@@ -314,13 +330,12 @@ def handle_message(event):
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"oil_switch": '1'}})
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'現在可以查詢油價囉! 輸入 查油價 試試看!'))
+                        event.reply_token, TextSendMessage(text=f'🔥🔥🔥現在可以查詢油價囉!\n輸入 查油價 試試看!'))
                 elif open_close == '關':
-                    print('油價 關')
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"oil_switch": '0'}})
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'查詢油價功能已關閉. 若要再次打開可以請管理員輸入:油價 開'))
+                        text=f'查詢油價功能已關閉. 若要再次打開可以請管理員輸入:\n油價 開'))
                     return '200'
                 else:
                     line_bot_api.reply_message(
@@ -332,7 +347,7 @@ def handle_message(event):
                 return '200'
         else:
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
             return '200'
 
     elif "匯率 開" in event.message.text or "匯率 關" in event.message.text:
@@ -344,13 +359,13 @@ def handle_message(event):
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"exchange_switch": '1'}})
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'現在可以查詢匯率囉! 輸入 查匯率 試試看!'))
+                        event.reply_token, TextSendMessage(text=f'🔥🔥🔥現在可以查詢匯率囉!\n輸入 查匯率 試試看!'))
                     return '200'
                 elif open_close == '關':
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"exchange_switch": '0'}})
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'查詢匯率功能已關閉. 若要再次打開可以請管理員輸入:匯率 開'))
+                        text=f'查詢匯率功能已關閉. 若要再次打開可以請管理員輸入:\n匯率 開'))
                     return '200'
                 else:
                     line_bot_api.reply_message(
@@ -374,13 +389,13 @@ def handle_message(event):
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"zodiacSigns_switch": '1'}})
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'現在可以查星座運勢囉! 輸入不同星座試試看!'))
+                        event.reply_token, TextSendMessage(text=f'🔥🔥🔥現在可以查星座運勢囉! 輸入不同星座試試看!'))
                     return '200'
                 elif open_close == '關':
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"zodiacSigns_switch": '0'}})
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'查訊星座運勢功能已關閉. 若要再次打開可以請管理員輸入:星座 開'))
+                        text=f'查訊星座運勢功能已關閉. 若要再次打開可以請管理員輸入:\n星座 開'))
                     return '200'
                 else:
                     line_bot_api.reply_message(
@@ -392,7 +407,7 @@ def handle_message(event):
                 return '200'
         else:
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
             return '200'
 
     elif "天氣 開" in event.message.text or "天氣 關" in event.message.text:
@@ -404,12 +419,12 @@ def handle_message(event):
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"weather_switch": '1'}})
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'現在可以查天氣預報囉! 輸入不同縣市試試看!'))
+                        event.reply_token, TextSendMessage(text=f'🔥🔥🔥現在可以查天氣預報囉! 輸入不同縣市試試看!'))
                 elif open_close == '關':
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"weather_switch": '0'}})
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'查訊天氣功能已關閉. 若要再次打開可以請管理員輸入:天氣 開'))
+                        text=f'查訊天氣功能已關閉. 若要再次打開可以請管理員輸入:\n天氣 開'))
                 else:
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'指令不明確. 範例:\n天氣 開\n天氣 關'))
@@ -428,12 +443,16 @@ def handle_message(event):
             if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 members = message.split(' @')[1:]
+                managers_res = f'✨已成功將以下成員新增為管理員:\n'
+                j = 0
                 for i in members:
+                    j = j + 1
                     i.strip()
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$push": {"group_managers": i.rstrip()}})
+                    managers_res += f'{j}. {i.rstrip()}\n'
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'已成功將以下成員新增為管理員:\n{members}'))
+                    event.reply_token, TextSendMessage(text=managers_res))
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'沒有權限'))
@@ -442,33 +461,33 @@ def handle_message(event):
                 event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
             return '200'
 
-    elif "入群歡迎詞 開" in event.message.text or "入群歡迎詞 關" in event.message.text:
-        if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, event.source.user_id):
-                message = event.message.text
-                open_close = message.split(' ')[1]
-                if open_close == '開':
-                    group_id_table.update_one({'_id': event.source.group_id}, {
-                        "$set": {"member_joined_word_switch": '1'}})
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'現在可以設定入群歡迎詞囉! 輸入 入群歡迎詞=XXX 試試!'))
-                elif open_close == '關':
-                    group_id_table.update_one({'_id': event.source.group_id}, {
-                        "$set": {"member_joined_word_switch": '0'}})
-                    line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'入群歡迎詞功能已關閉. 若要再次打開可以請管理員輸入:入群歡迎詞 開'))
-                else:
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'指令不明確. 範例:\入群歡迎詞 開\入群歡迎詞 關'))
-                return '200'
-            else:
-                line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'沒有權限'))
-                return '200'
-        else:
-            line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
-            return '200'
+    # elif "入群歡迎詞 開" in event.message.text or "入群歡迎詞 關" in event.message.text:
+    #     if group_enable(event.source.group_id):
+    #         if manager_check(event.source.group_id, event.source.user_id):
+    #             message = event.message.text
+    #             open_close = message.split(' ')[1]
+    #             if open_close == '開':
+    #                 group_id_table.update_one({'_id': event.source.group_id}, {
+    #                     "$set": {"member_joined_word_switch": '1'}})
+    #                 line_bot_api.reply_message(
+    #                     event.reply_token, TextSendMessage(text=f'現在可以設定入群歡迎詞囉! 輸入 入群歡迎詞=XXX 試試!'))
+    #             elif open_close == '關':
+    #                 group_id_table.update_one({'_id': event.source.group_id}, {
+    #                     "$set": {"member_joined_word_switch": '0'}})
+    #                 line_bot_api.reply_message(event.reply_token, TextSendMessage(
+    #                     text=f'入群歡迎詞功能已關閉. 若要再次打開可以請管理員輸入:入群歡迎詞 開'))
+    #             else:
+    #                 line_bot_api.reply_message(
+    #                     event.reply_token, TextSendMessage(text=f'指令不明確. 範例:\n入群歡迎詞 開\n入群歡迎詞 關'))
+    #             return '200'
+    #         else:
+    #             line_bot_api.reply_message(
+    #                 event.reply_token, TextSendMessage(text=f'沒有權限'))
+    #             return '200'
+    #     else:
+    #         line_bot_api.reply_message(
+    #             event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+    #         return '200'
 
     elif "入群歡迎圖 開" in event.message.text or "入群歡迎圖 關" in event.message.text:
         if group_enable(event.source.group_id):
@@ -479,15 +498,15 @@ def handle_message(event):
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"member_joined_figure_switch": '1'}})
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'現在可以設定入群歡迎圖囉!'))
+                        event.reply_token, TextSendMessage(text=f'🔥現在可以設定入群歡迎圖囉! 請輸入:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png/.gif)及10MB以下影片檔(./mp4)'))
                 elif open_close == '關':
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"member_joined_figure_switch": '0'}})
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'入群歡迎圖功能已關閉. 若要再次打開可以請管理員輸入:入群歡迎圖 開'))
+                        text=f'入群歡迎圖功能已關閉. 若要再次打開可以請管理員輸入:\n入群歡迎圖 開'))
                 else:
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'指令不明確. 範例:\入群歡迎圖 開\入群歡迎圖 關'))
+                        event.reply_token, TextSendMessage(text=f'指令不明確. 範例:\n入群歡迎圖 開\n入群歡迎圖 關'))
                 return '200'
             else:
                 line_bot_api.reply_message(
@@ -507,7 +526,7 @@ def handle_message(event):
                     group_id_table.update_one({'_id': event.source.group_id}, {
                         "$set": {"member_joined_figure": welcome_figure}})
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'已成功設定入群歡迎圖！'))
+                        event.reply_token, TextSendMessage(text=f'🙌已成功設定入群歡迎圖！\n新成員加入群組將會自動傳送'))
                 else:
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'此功能關閉中ㄛ，要開啟請輸入：入群歡迎圖 開\nps.須具備管理員權限'))
