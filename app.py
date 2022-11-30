@@ -32,6 +32,7 @@ line_bot_api = LineBotApi(
 # Channel Secret
 handler = WebhookHandler('006edd39f89ac911eb9d5fec524457e8')
 
+access_token = 'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU='
 # 監聽所有來自 /callback 的 Post Request
 
 mongoClient = pymongo.MongoClient(
@@ -83,8 +84,8 @@ def callback():
 @handler.add(JoinEvent)
 def bot_join(event):
     gid = event.source.group_id
-    headers = {"content-type": "application/json; charset=UTF-8", 'Authorization': 'Bearer {}'.format(
-        'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU=')}
+    headers = {"content-type": "application/json; charset=UTF-8",
+               'Authorization': 'Bearer {}'.format(access_token)}
     url = 'https://api.line.me/v2/bot/group/' + gid + '/summary'
     response = requests.get(url, headers=headers)
     response = response.json()
@@ -114,6 +115,7 @@ def welcome(event):
         for i in group_id_table.find():
             if gid == i['_id']:
                 image_url = i['member_joined_figure']
+    print(image_url)
     image_message = ImageSendMessage(
         original_content_url=image_url,
         preview_image_url=image_url
@@ -305,7 +307,7 @@ def handle_message(event):
 
     elif "油價 開" in event.message.text or "油價 關" in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
+            if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 open_close = message.split(' ')[1]
                 if open_close == '開':
@@ -326,7 +328,7 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'您沒有這個權限ㄛ.'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
                 return '200'
         else:
             line_bot_api.reply_message(
@@ -335,7 +337,7 @@ def handle_message(event):
 
     elif "匯率 開" in event.message.text or "匯率 關" in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
+            if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 open_close = message.split(' ')[1]
                 if open_close == '開':
@@ -356,7 +358,7 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'您沒有這個權限ㄛ.'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
                 return '200'
         else:
             line_bot_api.reply_message(
@@ -365,7 +367,7 @@ def handle_message(event):
 
     elif "星座 開" in event.message.text or "星座 關" in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
+            if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 open_close = message.split(' ')[1]
                 if open_close == '開':
@@ -386,7 +388,7 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'您沒有這個權限ㄛ.'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
                 return '200'
         else:
             line_bot_api.reply_message(
@@ -395,7 +397,7 @@ def handle_message(event):
 
     elif "天氣 開" in event.message.text or "天氣 關" in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
+            if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 open_close = message.split(' ')[1]
                 if open_close == '開':
@@ -414,7 +416,7 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'你沒有這個權限ㄛ'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
                 return '200'
         else:
             line_bot_api.reply_message(
@@ -423,18 +425,18 @@ def handle_message(event):
 
     elif '新增管理員' in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
+            if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 members = message.split(' @')[1:]
                 for i in members:
                     i.strip()
                     group_id_table.update_one({'_id': event.source.group_id}, {
-                        "$push": {"group_managers": i}})
+                        "$push": {"group_managers": i.rstrip()}})
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'已成功將以下成員新增為管理員:\n{members}'))
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'你沒有這個權限ㄛ'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
         else:
             line_bot_api.reply_message(
                 event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
@@ -442,7 +444,7 @@ def handle_message(event):
 
     elif "入群歡迎詞 開" in event.message.text or "入群歡迎詞 關" in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
+            if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 open_close = message.split(' ')[1]
                 if open_close == '開':
@@ -461,7 +463,7 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'你沒有這個權限ㄛ'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
                 return '200'
         else:
             line_bot_api.reply_message(
@@ -470,7 +472,7 @@ def handle_message(event):
 
     elif "入群歡迎圖 開" in event.message.text or "入群歡迎圖 關" in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
+            if manager_check(event.source.group_id, event.source.user_id):
                 message = event.message.text
                 open_close = message.split(' ')[1]
                 if open_close == '開':
@@ -489,7 +491,7 @@ def handle_message(event):
                 return '200'
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'你沒有這個權限ㄛ'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
                 return '200'
         else:
             line_bot_api.reply_message(
@@ -498,16 +500,21 @@ def handle_message(event):
 
     elif '入群歡迎圖=' in event.message.text:
         if group_enable(event.source.group_id):
-            if manager_check(event.source.group_id, line_bot_api.get_profile(event.source.user_id).display_name):
-                message = event.message.text
-                welcome_figure = message.split('=')[1]
-                group_id_table.update_one({'_id': event.source.group_id}, {
-                    "$set": {"member_joined_figure": welcome_figure}})
-                line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'已成功設定入群歡迎圖！'))
+            if manager_check(event.source.group_id, event.source.user_id):
+                if member_joined_figure_switch_check(event.source.group_id):
+                    message = event.message.text
+                    welcome_figure = message.split('=')[1]
+                    group_id_table.update_one({'_id': event.source.group_id}, {
+                        "$set": {"member_joined_figure": welcome_figure}})
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'已成功設定入群歡迎圖！'))
+                else:
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'此功能關閉中ㄛ，要開啟請輸入：入群歡迎圖 開\nps.須具備管理員權限'))
+                    return '200'
             else:
                 line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'你沒有這個權限ㄛ'))
+                    event.reply_token, TextSendMessage(text=f'沒有權限'))
                 return '200'
         else:
             line_bot_api.reply_message(
@@ -734,14 +741,18 @@ def member_joined_figure_switch_check(group_id):
 
 
 def manager_check(group_id, user_id):
-    print(user_id)
+    headers = {"content-type": "application/json; charset=UTF-8",
+               'Authorization': 'Bearer {}'.format(access_token)}
+    profile = requests.get('https://api.line.me/v2/bot/group/' +
+                           group_id + "/member/" + user_id, headers=headers)
+    profile = profile.json()
+    user_name = profile['displayName']
     for i in group_id_table.find():
         if group_id == i['_id']:
             for j in i['group_managers']:
-                if user_id == j:
+                if user_name == j:
                     return True
-                else:
-                    return False
+            return False
 
 
 if __name__ == "__main__":
