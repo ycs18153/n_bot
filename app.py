@@ -115,27 +115,31 @@ def welcome(event):
         for i in group_id_table.find():
             if gid == i['_id']:
                 image_url = i['member_joined_figure']
-    urls = image_url.rsplit('.', 1)[1]
-    if urls == 'mp4':
-        try:
-            line_bot_api.reply_message(event.reply_token, VideoSendMessage(
-                original_content_url=image_url,  # 影片的網址，可以參考圖片的上傳方式
-                preview_image_url=image_url  # 影片預覽的圖片
-            ))
-        except:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                text=f'上傳的圖片格式有誤，請輸入以下指令重新上傳:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png/.gif)及10MB以下影片檔(./mp4)\n'))
-    else:
-        try:
-            image_message = ImageSendMessage(
-                original_content_url=image_url,
-                preview_image_url=image_url
-            )
-            line_bot_api.reply_message(
-                event.reply_token, image_message)
-        except:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                text=f'上傳的圖片格式有誤，請輸入以下指令重新上傳:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png)及10MB以下影片檔(./mp4)\n'))
+    try:
+        urls = image_url.rsplit('.', 1)[1]
+        if urls == 'mp4':
+            try:
+                line_bot_api.reply_message(event.reply_token, VideoSendMessage(
+                    original_content_url=image_url,  # 影片的網址，可以參考圖片的上傳方式
+                    preview_image_url=image_url  # 影片預覽的圖片
+                ))
+            except:
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                    text=f'上傳的圖片格式有誤，請輸入以下指令重新上傳:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png/.gif)及10MB以下影片檔(./mp4)\n'))
+        else:
+            try:
+                image_message = ImageSendMessage(
+                    original_content_url=image_url,
+                    preview_image_url=image_url
+                )
+                line_bot_api.reply_message(
+                    event.reply_token, image_message)
+            except:
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                    text=f'上傳的圖片格式有誤，請輸入以下指令重新上傳:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png)及10MB以下影片檔(./mp4)\n'))
+    except:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(
+            text=f'上傳的圖片格式有誤，請輸入以下指令重新上傳:\n入群歡迎圖=[圖檔網址]\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png)及10MB以下影片檔(./mp4)\n'))
 
 
 zodiacSigns_dict = {
