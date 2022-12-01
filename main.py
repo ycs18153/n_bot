@@ -22,6 +22,7 @@ from pymongo import MongoClient
 import certifi
 import time
 import random
+from threading import Thread
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -367,18 +368,7 @@ def handle_message(event):
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
-        # elif '抽獎範例' == message:
-        #     if group_enable(gid):
-        #         if manager_check(gid, uid):
-        #             res = '===抽獎===\n\n獎項\nXXX\n\n資格名單\n@A @B @C\n\n開獎人數\n1'
-        #             line_bot_api.reply_message(
-        #                 event.reply_token, TextSendMessage(text=res))
-        #         else:
-        #             line_bot_api.reply_message(
-        #                 event.reply_token, TextSendMessage(text=f'沒有權限'))
-        #     else:
-        #         line_bot_api.reply_message(
-        #             event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+
         elif '===抽獎===' in message:
             if group_enable(gid):
                 if manager_check(gid, uid):
@@ -389,7 +379,11 @@ def handle_message(event):
                         win_count = split_message[8]
                         line_bot_api.reply_message(
                             event.reply_token, TextSendMessage(text=f'🔥抽獎結果將在20秒公布!\n請耐心等候'))
-                        lottery(gid, item, candidate_lst, win_count)
+                        lottery_thread = Thread(target=lottery, args=(
+                            gid, item, candidate_lst, win_count))
+                        lottery_thread.start()
+                        # lottery(gid, item, candidate_lst, win_count)
+
                     else:
                         line_bot_api.reply_message(
                             event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
