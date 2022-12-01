@@ -39,7 +39,7 @@ access_token = ''
 # 監聽所有來自 /callback 的 Post Request
 
 mongoClient = pymongo.MongoClient(
-    "mongodb+srv://<user>:<password>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+    "mongodb+srv://<user>:<pass>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
@@ -212,15 +212,12 @@ def handle_message(event):
                     oil_res = oilPrice()
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'{oil_res}'))
-                    return '200'
                 else:
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
                         text=f'❌查油價功能未開啟\n'))
-                    return '200'
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
-                return '200'
 
         elif "查匯率" in event.message.text:
             if group_enable(gid):
@@ -232,11 +229,9 @@ def handle_message(event):
                 else:
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
                         text=f'❌查匯率功能未開啟'))
-                    return '200'
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
-                return '200'
 
         # 星座運勢
         elif event.message.text in [i for i in zodiacSigns_lst]:
@@ -248,15 +243,12 @@ def handle_message(event):
                     zodiacSigns_res = zodiacSigns(int(key[0]))
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'{zodiacSigns_res}'))
-                    return '200'
                 else:
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
                         text=f'❌星座運勢功能未開啟'))
-                    return '200'
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
-                return '200'
 
         # 天氣預報
         elif event.message.text in [i for i in cityId_lst]:
@@ -268,15 +260,12 @@ def handle_message(event):
                     weather_res = weather(city[0])
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'{weather_res}'))
-                    return '200'
                 else:
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
                         text=f'❌天氣預報功能未開啟'))
-                    return '200'
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
-                return '200'
 
         elif "查管理員" in event.message.text:
             if group_enable(gid):
@@ -290,11 +279,9 @@ def handle_message(event):
                 group_managers_res += f'總共{j}個人'
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'{group_managers_res}'))
-                return '200'
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
-                return '200'
 
         elif " 開" in event.message.text or " 關" in event.message.text:
             if group_enable(gid):
