@@ -345,7 +345,7 @@ def handle_message(event):
         elif '入群歡迎圖=' in event.message.text:
             if group_enable(event.source.group_id):
                 if manager_check(event.source.group_id, event.source.user_id):
-                    if switch_checker(gid, 'member_joined_figure'):
+                    if switch_checker(gid, 'member_joined_figure_switch'):
                         message = event.message.text
                         welcome_figure = message.split('=')[1]
                         group_id_table.update_one({'_id': event.source.group_id}, {
