@@ -20,6 +20,8 @@ import json
 import pymongo
 from pymongo import MongoClient
 import certifi
+import time
+import random
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -31,15 +33,15 @@ app = Flask(__name__)
 
 # Channel Access Token
 line_bot_api = LineBotApi(
-    '')
+    'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU=')
 # Channel Secret
-handler = WebhookHandler('')
+handler = WebhookHandler('006edd39f89ac911eb9d5fec524457e8')
 
-access_token = ''
+access_token = 'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU='
 # 監聽所有來自 /callback 的 Post Request
 
 mongoClient = pymongo.MongoClient(
-    "mongodb+srv://<user>:<pass>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+    "mongodb+srv://andy:acdwsx321@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
@@ -94,6 +96,7 @@ def bot_join(event):
         'state': '0',
         'zodiacSigns_switch': '1',
         'weather_switch': '1',
+        'lottery_switch': '1',
         'authentication_code': ''
     })
 
@@ -199,14 +202,14 @@ def handle_message(event):
         gid = event.source.group_id
         uid = event.source.user_id
         message = event.message.text
-        if "授權碼=" in event.message.text:
+        if "授權碼=" in message:
             code = message.split('=')[1]
             uname = line_bot_api.get_profile(uid).display_name
             res_txt = authenticated_check(gid, uname, code)
             line_bot_api.reply_message(
                 event.reply_token, TextSendMessage(text=res_txt))
 
-        elif "查油價" in event.message.text:
+        elif "查油價" == message:
             if group_enable(gid):
                 if switch_checker(gid, 'oil_switch'):
                     oil_res = oilPrice()
@@ -219,7 +222,7 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
 
-        elif "查匯率" in event.message.text:
+        elif "查匯率" == message:
             if group_enable(gid):
                 if switch_checker(gid, 'exchange_switch'):
                     exchange_res = exchangeRate()
@@ -234,7 +237,7 @@ def handle_message(event):
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
 
         # 星座運勢
-        elif event.message.text in [i for i in zodiacSigns_lst]:
+        elif message in [i for i in zodiacSigns_lst]:
             if group_enable(gid):
                 if switch_checker(gid, 'zodiacSigns_switch'):
                     zodiacSigns_res = ''
@@ -251,7 +254,7 @@ def handle_message(event):
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
 
         # 天氣預報
-        elif event.message.text in [i for i in cityId_lst]:
+        elif message in [i for i in cityId_lst]:
             if group_enable(gid):
                 if switch_checker(gid, 'weather_switch'):
                     city = [v[0] for k, v in cityId_dict.items()
@@ -267,7 +270,7 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
 
-        elif "查管理員" in event.message.text:
+        elif "查管理員" == message:
             if group_enable(gid):
                 managers_list = []
                 group_managers_res = '◢◢◢本群管理員◣◣◣\n'
@@ -283,7 +286,7 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
 
-        elif " 開" in event.message.text or " 關" in event.message.text:
+        elif " 開" in message or " 關" in message:
             if group_enable(gid):
                 if manager_check(gid, uid):
                     record = message.split(' ')[0]
@@ -293,10 +296,6 @@ def handle_message(event):
                         open_close = '1'
                     elif open_close == '關':
                         open_close = '0'
-                    else:
-                        line_bot_api.reply_message(
-                            event.reply_token, TextSendMessage(text=f'指令不明確'))
-
                     if record == '油價':
                         return_res = switch_on_off(
                             gid, open_close, 'oil_switch', record)
@@ -309,6 +308,9 @@ def handle_message(event):
                     elif record == '天氣':
                         return_res = switch_on_off(
                             gid, open_close, 'weather_switch', record)
+                    elif record == '抽獎':
+                        return_res = switch_on_off(
+                            gid, open_close, 'lottery_switch', record)
                     elif record == '入群歡迎圖':
                         return_res = switch_on_off(
                             gid, open_close, 'member_joined_figure_switch', record)
@@ -321,20 +323,25 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼'))
 
-        elif '新增管理員' in event.message.text:
+        elif '新增管理員' in message:
             if group_enable(gid):
                 if manager_check(gid, uid):
                     members = message.split(' @')[1:]
+                    print(members)
                     managers_res = f'✨已成功將以下成員新增為管理員:\n'
-                    j = 0
-                    for i in members:
-                        j = j + 1
-                        i.strip()
-                        group_id_table.update_one({'_id': event.source.group_id}, {
-                            "$push": {"group_managers": i.rstrip()}})
-                        managers_res += f'{j}. {i.rstrip()}\n'
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=managers_res))
+                    if len(members) == 0:
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text='指令不明確'))
+                    else:
+                        j = 0
+                        for i in members:
+                            j = j + 1
+                            i.strip()
+                            group_id_table.update_one({'_id': event.source.group_id}, {
+                                "$push": {"group_managers": i.rstrip()}})
+                            managers_res += f'{j}. {i.rstrip()}\n'
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=managers_res))
                 else:
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'沒有權限'))
@@ -342,13 +349,12 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
 
-        elif '入群歡迎圖=' in event.message.text:
-            if group_enable(event.source.group_id):
-                if manager_check(event.source.group_id, event.source.user_id):
+        elif '入群歡迎圖=' in message:
+            if group_enable(gid):
+                if manager_check(gid, uid):
                     if switch_checker(gid, 'member_joined_figure_switch'):
-                        message = event.message.text
                         welcome_figure = message.split('=')[1]
-                        group_id_table.update_one({'_id': event.source.group_id}, {
+                        group_id_table.update_one({'_id': gid}, {
                             "$set": {"member_joined_figure": welcome_figure}})
                         line_bot_api.reply_message(
                             event.reply_token, TextSendMessage(text=f'🙌已成功設定入群歡迎圖'))
@@ -361,13 +367,66 @@ def handle_message(event):
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
-
+        # elif '抽獎範例' == message:
+        #     if group_enable(gid):
+        #         if manager_check(gid, uid):
+        #             res = '===抽獎===\n\n獎項\nXXX\n\n資格名單\n@A @B @C\n\n開獎人數\n1'
+        #             line_bot_api.reply_message(
+        #                 event.reply_token, TextSendMessage(text=res))
+        #         else:
+        #             line_bot_api.reply_message(
+        #                 event.reply_token, TextSendMessage(text=f'沒有權限'))
+        #     else:
+        #         line_bot_api.reply_message(
+        #             event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
+        elif '===抽獎===' in message:
+            if group_enable(gid):
+                if manager_check(gid, uid):
+                    if switch_checker(gid, 'lottery_switch'):
+                        split_message = message.splitlines()
+                        item = split_message[2]
+                        candidate_lst = split_message[5].split(' ')
+                        win_count = split_message[8]
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'🔥抽獎結果將在20秒公布!\n請耐心等候'))
+                        lottery(gid, item, candidate_lst, win_count)
+                    else:
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
+                else:
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'沒有權限'))
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'機器人尚未激活\n請先向官方取得授權碼.'))
         else:
             print('else detect!!!!!!!!!')
 
     except:
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=f'⚠️機器人不支援服務個人或偵測到錯誤'))
+
+
+def lottery(gid, item, candidate_lst, win_count):
+    winner_lst = random.sample(candidate_lst, int(win_count))
+    winner_str = ''
+    for i in winner_lst:
+        winner_str += f'{i} '
+
+    headers = {"content-type": "application/json; charset=UTF-8",
+                               'Authorization': 'Bearer {}'.format(access_token)}
+    body = {
+        'to': gid,
+        'messages': [{
+            'type': 'text',
+            'text': f'🔥🔥🔥抽獎結果出爐🔥🔥🔥\n\n恭喜以下成員抽中 {item}\n\n{winner_str}'
+        }]
+    }
+    time.sleep(3)
+
+    # 向指定網址發送 request
+    req = requests.request('POST', 'https://api.line.me/v2/bot/message/push',
+                           headers=headers, data=json.dumps(body).encode('utf-8'))
 
 
 if __name__ == "__main__":

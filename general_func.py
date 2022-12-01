@@ -3,9 +3,9 @@ from pymongo import MongoClient
 import certifi
 import requests
 
-access_token = ''
+access_token = 'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU='
 mongoClient = pymongo.MongoClient(
-    "mongodb+srv://<user>:<pass>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+    "mongodb+srv://andy:acdwsx321@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
@@ -22,8 +22,9 @@ def group_enable(group_id):
 
 def get_image_url(gid):
     figure_res = group_id_table.find({'_id': gid})
-    image_url = figure_res['member_joined_figure']
-    return image_url
+    print(figure_res)
+    for i in figure_res:
+        return i['member_joined_figure']
 
 
 def switch_checker(gid, record):
@@ -36,10 +37,11 @@ def switch_checker(gid, record):
 
 
 def switch_on_off(gid, open_close, key, record):
-    group_id_table.update_one({'_id': gid}, {"$set": {key: open_close}})
     if open_close == '0':
+        group_id_table.update_one({'_id': gid}, {"$set": {key: open_close}})
         return f'😔{record} 功能已關閉'
     elif open_close == '1':
+        group_id_table.update_one({'_id': gid}, {"$set": {key: open_close}})
         return f'🔥{record} 功能已開啟'
     else:
         return '指令不明確'
@@ -60,13 +62,14 @@ def manager_check(group_id, user_id):
             return False
 
 
-def list_managers(group_id):
+def list_managers(gid):
     managers = []
-    for i in group_id_table.find():
-        if group_id == i['_id']:
-            for j in i['group_managers']:
-                managers.append(j)
-    return managers
+    manager_res = group_id_table.find({'_id': gid})
+    for i in manager_res:
+        return i['group_managers']
+    #     for j in i['group_managers']:
+    #         managers.append(j)
+    # return managers
 
 
 def authenticated_check(gid, uname, code):
