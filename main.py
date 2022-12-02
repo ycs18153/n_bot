@@ -179,13 +179,13 @@ cityId_dict = {
     '67': ['臺南市', '台南市', '台南', '臺南'],
     '68': ['桃園市', '桃園'],
     '10018': ['新竹市', '新竹'],
-    '10004': '新竹縣',
+    '10004': ['新竹縣'],
     '10005': ['苗栗縣', '苗栗'],
     '10007': ['彰化縣', '彰化'],
     '10008': ['南投縣', '南投'],
     '10009': ['雲林縣', '雲林'],
     '10020': ['嘉義市', '嘉義'],
-    '10010': '嘉義縣',
+    '10010': ['嘉義縣'],
     '10017': ['基隆市', '基隆'],
     '10013': ['屏東縣', '屏東'],
     '10002': ['宜蘭縣', '宜蘭'],
@@ -215,6 +215,8 @@ def handle_message(event):
             res_txt = authenticated_check(gid, uname, code)
             line_bot_api.reply_message(
                 event.reply_token, TextSendMessage(text=res_txt))
+
+        # elif 'help' == message:
 
         elif "查油價" == message:
             if group_enable(gid):
@@ -260,13 +262,14 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
 
-        # 天氣預報
-        elif message in [i for i in cityId_lst]:
+        elif '天氣=' in message:
             if group_enable(gid):
                 if switch_checker(gid, 'weather_switch'):
+                    m = message.split('=')[1]
+                    print(m)
                     city = [v[0] for k, v in cityId_dict.items()
-                            if event.message.text in v]
-                    # key = [int(k) for k, v in cityId_dict.items() if event.message.text in v]
+                            if m in v]
+                    print(city)
                     weather_res = weather(city[0])
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'{weather_res}'))
@@ -276,6 +279,23 @@ def handle_message(event):
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+
+        # 天氣預報
+        # elif message in [i for i in cityId_lst]:
+        #     if group_enable(gid):
+        #         if switch_checker(gid, 'weather_switch'):
+        #             city = [v[0] for k, v in cityId_dict.items()
+        #                     if event.message.text in v]
+        #             # key = [int(k) for k, v in cityId_dict.items() if event.message.text in v]
+        #             weather_res = weather(city[0])
+        #             line_bot_api.reply_message(
+        #                 event.reply_token, TextSendMessage(text=f'{weather_res}'))
+        #         else:
+        #             line_bot_api.reply_message(event.reply_token, TextSendMessage(
+        #                 text=f'❌天氣預報功能未開啟'))
+        #     else:
+        #         line_bot_api.reply_message(
+        #             event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
 
         elif "查管理員" == message:
             if group_enable(gid):
@@ -344,8 +364,36 @@ def handle_message(event):
                         for i in members:
                             j = j + 1
                             i.strip()
-                            group_id_table.update_one({'_id': event.source.group_id}, {
-                                "$push": {"group_managers": i.rstrip()}})
+                            group_id_table.update_one(
+                                {'_id': gid}, {"$push": {"group_managers": i.rstrip()}})
+                            managers_res += f'{j}. {i.rstrip()}\n'
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=managers_res))
+                else:
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+
+        elif '刪除管理員' in message:
+            if group_enable(gid):
+                if manager_check(gid, uid):
+                    members = message.split(' @')[1:]
+                    print(members)
+                    managers_res = f'✨已成功將以下成員從管理員刪除:\n'
+                    if len(members) == 0:
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text='⚠️指令不明確'))
+                    else:
+                        j = 0
+                        for i in members:
+                            j = j + 1
+                            i.strip()
+                            group_id_table.update_one(
+                                {'_id': gid}, {'$pull': {'group_managers': i.rstrip()}})
+                            # group_id_table.update_one(
+                            #     {'_id': gid}, {"$push": {"group_managers": i.rstrip()}})
                             managers_res += f'{j}. {i.rstrip()}\n'
                         line_bot_api.reply_message(
                             event.reply_token, TextSendMessage(text=managers_res))
@@ -518,7 +566,7 @@ def handle_message(event):
 
 def lottery_push_message(gid, case):
     headers = {"content-type": "application/json; charset=UTF-8",
-                               'Authorization': 'Bearer {}'.format(access_token)}
+               'Authorization': 'Bearer {}'.format(access_token)}
     res = ''
     if case == 'item':
         res = f'請複製上列訊息並輸入獎項取代問號\n範例輸入如下⬇⬇⬇\n獎項=3000現金'
@@ -547,7 +595,7 @@ def lottery(gid, item, candidate_lst, win_count):
         winner_str += f'@{i} '
     time.sleep(20)
     headers = {"content-type": "application/json; charset=UTF-8",
-                               'Authorization': 'Bearer {}'.format(access_token)}
+               'Authorization': 'Bearer {}'.format(access_token)}
     body = {
         'to': gid,
         'messages': [{
