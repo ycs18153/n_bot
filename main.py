@@ -34,15 +34,15 @@ app = Flask(__name__)
 
 # Channel Access Token
 line_bot_api = LineBotApi(
-    '')
+    'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU=')
 # Channel Secret
-handler = WebhookHandler('')
+handler = WebhookHandler('006edd39f89ac911eb9d5fec524457e8')
 
-access_token = ''
+access_token = 'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU='
 # 監聽所有來自 /callback 的 Post Request
 
 mongoClient = pymongo.MongoClient(
-    "mongodb+srv://<user_name>:<password>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+    "mongodb+srv://andy:acdwsx321@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
@@ -99,7 +99,10 @@ def bot_join(event):
         'zodiacSigns_switch': '1',
         'weather_switch': '1',
         'lottery_switch': '1',
-        'authentication_code': ''
+        'authentication_code': '',
+        'lottery_item': '',
+        'lottery_candidate': [],
+        'lottery_win_count': ''
     })
 
 
@@ -277,13 +280,13 @@ def handle_message(event):
         elif "查管理員" == message:
             if group_enable(gid):
                 managers_list = []
-                group_managers_res = '◢◢◢本群管理員◣◣◣\n'
+                group_managers_res = '—————本群管理員—————\n'
                 managers_list = list_managers(gid)
                 j = 0
                 for i in managers_list:
                     j = j + 1
                     group_managers_res += f'➛{j}. {i}\n'
-                group_managers_res += f'總共{j}個人'
+                group_managers_res += f'—————本群管理員—————\n總共{j}個人'
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'{group_managers_res}'))
             else:
@@ -372,21 +375,107 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
 
-        elif '=== 抽獎 ===' in message:
+        elif '抽獎' in message:
             if group_enable(gid):
                 if manager_check(gid, uid):
                     if switch_checker(gid, 'lottery_switch'):
-                        split_message = message.splitlines()
-                        item = split_message[2]
-                        candidate_lst = split_message[5].split(' ')
-                        win_count = split_message[8]
                         line_bot_api.reply_message(
-                            event.reply_token, TextSendMessage(text=f'🔥抽獎結果將在20秒公布!\n請耐心等候'))
-                        lottery_thread = Thread(target=lottery, args=(
-                            gid, item, candidate_lst, win_count))
-                        lottery_thread.start()
+                            event.reply_token, TextSendMessage(text=f'獎項=?'))
+                        push_thread = Thread(
+                            target=lottery_push_message, args=(gid, 'item'))
+                        push_thread.start()
+                        # split_message = message.splitlines()
+                        # item = split_message[2]
+                        # candidate_lst = split_message[5].split(' ')
+                        # win_count = split_message[8]
+                        # line_bot_api.reply_message(
+                        #     event.reply_token, TextSendMessage(text=f'🔥抽獎結果將在20秒後公布!\n🔥請耐心等候~~~~'))
+                        # lottery_thread = Thread(target=lottery, args=(
+                        #     gid, item, candidate_lst, win_count))
+                        # lottery_thread.start()
                         # lottery(gid, item, candidate_lst, win_count)
 
+                    else:
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
+                else:
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+        elif '獎項=' in message:
+            if group_enable(gid):
+                if manager_check(gid, uid):
+                    if switch_checker(gid, 'lottery_switch'):
+                        item = message.split('=')[1]
+                        group_id_table.update_one(
+                            {'_id': gid}, {"$set": {"lottery_item": item}})
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'資格名單=?'))
+                        push_thread = Thread(
+                            target=lottery_push_message, args=(gid, 'candidate'))
+                        push_thread.start()
+                    else:
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
+                else:
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+
+        elif '資格名單=' in message:
+            if group_enable(gid):
+                if manager_check(gid, uid):
+                    if switch_checker(gid, 'lottery_switch'):
+                        m = message.split('=')[1]
+                        name_lst = m.split('@')[1:]
+                        print(name_lst)
+                        if len(name_lst) == 0:
+                            line_bot_api.reply_message(
+                                event.reply_token, TextSendMessage(text='⚠️指令不明確'))
+                        else:
+                            for i in name_lst:
+                                i.strip()
+                                group_id_table.update_one({'_id': gid}, {
+                                    "$push": {"lottery_candidate": i.rstrip()}})
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'開獎人數=?'))
+                        push_thread = Thread(
+                            target=lottery_push_message, args=(gid, 'count'))
+                        push_thread.start()
+                    else:
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
+                else:
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+
+        elif '開獎人數=' in message:
+            if group_enable(gid):
+                if manager_check(gid, uid):
+                    if switch_checker(gid, 'lottery_switch'):
+                        win_count = message.split('=')[1]
+                        group_id_table.update_one(
+                            {'_id': gid}, {"$set": {"lottery_win_count": win_count}})
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'🔥抽獎結果將在20秒後公布!\n🔥請耐心等候~~~~'))
+                        lottery_res = group_id_table.find({'_id': gid})
+                        lottery_item = ''
+                        lottery_candidate = ''
+                        lottery_win_count = ''
+                        for i in lottery_res:
+                            lottery_item = i['lottery_item']
+                            lottery_candidate = i['lottery_candidate']
+                            # lottery_win_count = i['lottery_win_count']
+                        push_thread = Thread(
+                            target=lottery, args=(gid, lottery_item, lottery_candidate, win_count))
+                        push_thread.start()
                     else:
                         line_bot_api.reply_message(
                             event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
@@ -419,7 +508,6 @@ def handle_message(event):
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-
         else:
             print('else detect!!!!!!!!!')
 
@@ -428,11 +516,35 @@ def handle_message(event):
             event.reply_token, TextSendMessage(text=f'⚠️機器人不支援服務個人或偵測到錯誤'))
 
 
+def lottery_push_message(gid, case):
+    headers = {"content-type": "application/json; charset=UTF-8",
+                               'Authorization': 'Bearer {}'.format(access_token)}
+    res = ''
+    if case == 'item':
+        res = f'請複製上列訊息並輸入獎項取代問號\n範例輸入如下⬇⬇⬇\n獎項=3000現金'
+    elif case == 'candidate':
+        res = f'請複製上列訊息並標記tag資格人以取代問號\n範例輸入如下⬇⬇⬇\n資格名單= @user1 @user2 @user3...'
+    elif case == 'count':
+        res = f'請複製上列訊息並輸入開獎人數取代問號\n範例輸入如下⬇⬇⬇\n開獎人數=1'
+    else:
+        res = f'⚠️指令不明確，請再輸入一次'
+
+    body = {
+        'to': gid,
+        'messages': [{
+            'type': 'text',
+            'text': res
+        }]
+    }
+    req = requests.request('POST', 'https://api.line.me/v2/bot/message/push',
+                           headers=headers, data=json.dumps(body).encode('utf-8'))
+
+
 def lottery(gid, item, candidate_lst, win_count):
     winner_lst = random.sample(candidate_lst, int(win_count))
     winner_str = ''
     for i in winner_lst:
-        winner_str += f'{i} '
+        winner_str += f'@{i} '
     time.sleep(20)
     headers = {"content-type": "application/json; charset=UTF-8",
                                'Authorization': 'Bearer {}'.format(access_token)}
@@ -440,7 +552,7 @@ def lottery(gid, item, candidate_lst, win_count):
         'to': gid,
         'messages': [{
             'type': 'text',
-            'text': f'🔥🔥🔥抽獎結果出爐🔥🔥🔥\n\n恭喜以下成員抽中 {item}\n\n{winner_str}'
+            'text': f'🔥🔥抽獎結果出爐🔥🔥\n\n恭喜以下成員抽中 {item}\n\n{winner_str}'
         }]
     }
 

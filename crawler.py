@@ -62,7 +62,7 @@ def exchangeRate():
 def zodiacSigns(key):
     today = datetime.date.today()
     d_sign = {
-        0: '牡羊座', 1: '金牛座', 2: '雙子座', 3: '巨蠍座', 4: '獅子座', 5: '處女座', 6: '天秤座', 7: '天蠍座', 8: '射手座', 9: '摩羯座', 10: '水瓶座', 11: '雙魚座'
+        0: '牡羊座', 1: '金牛座', 2: '雙子座', 3: '巨蟹座', 4: '獅子座', 5: '處女座', 6: '天秤座', 7: '天蠍座', 8: '射手座', 9: '摩羯座', 10: '水瓶座', 11: '雙魚座'
     }
     sign = ''
     for k, val in d_sign.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
@@ -95,7 +95,7 @@ def zodiacSigns(key):
     for i in total_text:
         if i:
             total_res.append(i.text.strip())
-    res = f'〖{today} {sign}星座運勢〗\n\n📝短評: {today_word.text.strip()}\n\n🔥今日{sign}完整解析\n\n🔢幸運數字: {lucky_lst[0]}\n🎨幸運顏色: {lucky_lst[1]}\n🌎開運方位: {lucky_lst[2]}\n🕰良辰吉時: {lucky_lst[3]}\n🍀幸運星座: {lucky_lst[4]}\n\n'
+    res = f'〖{today}\n{sign}星座運勢\n\n📝短評: {today_word.text.strip()}\n\n🔥今日{sign}完整解析\n\n🔢幸運數字: {lucky_lst[0]}\n🎨幸運顏色: {lucky_lst[1]}\n🌎開運方位: {lucky_lst[2]}\n🕰良辰吉時: {lucky_lst[3]}\n🍀幸運星座: {lucky_lst[4]}\n\n'
     for i in range(len(total_res)):
         res += f'{total_res[i]}\n'
     # res += f'{total_text.text.strip()}'
