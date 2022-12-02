@@ -3,9 +3,9 @@ from pymongo import MongoClient
 import certifi
 import requests
 
-access_token = 'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU='
+access_token = ''
 mongoClient = pymongo.MongoClient(
-    "mongodb+srv://andy:acdwsx321@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+    "mongodb+srv://<user>:<password>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
