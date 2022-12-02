@@ -27,8 +27,8 @@ from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from general_func import authenticated_check, group_enable, switch_checker, list_managers, manager_check, switch_on_off, get_image_url
-from crawler import oilPrice, exchangeRate, zodiacSigns, weather
+# from general_func import authenticated_check, group_enable, switch_checker, list_managers, manager_check, switch_on_off, get_image_url
+# from crawler import oilPrice, exchangeRate, zodiacSigns, weather
 
 app = Flask(__name__)
 
@@ -104,42 +104,6 @@ def bot_join(event):
         'lottery_candidate': [],
         'lottery_win_count': ''
     })
-
-
-@handler.add(MemberJoinedEvent)  # 入群歡迎圖
-def welcome(event):
-    # uid = event.joined.members[0].user_id
-    gid = event.source.group_id
-    image_url = ''
-    if switch_checker(gid, 'member_joined_figure_switch'):
-        image_url = get_image_url(gid)
-        try:
-            urls = image_url.rsplit('.', 1)[1]
-            if urls == 'mp4':
-                try:
-                    line_bot_api.reply_message(event.reply_token, VideoSendMessage(
-                        original_content_url=image_url,  # 影片的網址，可以參考圖片的上傳方式
-                        preview_image_url=image_url  # 影片預覽的圖片
-                    ))
-                except:
-                    line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'❌當初上傳的圖片格式有誤，請重新上傳:\n入群歡迎圖=[圖檔網址]\n\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png/.gif)及10MB以下影片檔(./mp4)\n'))
-            else:
-                try:
-                    image_message = ImageSendMessage(
-                        original_content_url=image_url,
-                        preview_image_url=image_url
-                    )
-                    line_bot_api.reply_message(
-                        event.reply_token, image_message)
-                except:
-                    line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                        text=f'❌當初上傳的圖片格式有誤，請重新上傳:\n入群歡迎圖=[圖檔網址]\n\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png/.gif)及10MB以下影片檔(./mp4)\n'))
-        except:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                text=f'上傳的圖片格式有誤，請重新上傳:\n入群歡迎圖=[圖檔網址]\n\nps.圖檔網址必須為https開頭，接受1MB以下圖檔(.jpg/.jpeg/.png/.gif)及10MB以下影片檔(./mp4)\n'))
-    else:
-        return
 
 
 zodiacSigns_dict = {
@@ -223,7 +187,7 @@ def handle_message(event):
                 func_str = '💡[功能]可輸入：油價、匯率、星座、天氣、抽獎\n範例輸入1：油價 開\n範例輸入2：抽獎 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
                 auth_str = '💡[user]內可標記連續標記\n輸入範例1：新增管理員 @user1 @user2 @user3\n輸入範例2：刪除管理員 @user1 @user2\nps.輸入完新增(或刪除)管理員後，需空一格再開始標記'
                 # lottery_v1 = '請依循步驟：\n1.🔐➛抽獎：此時機器人將請你輸入獎項\n2.🔐➛獎項=[您的獎項]：請連同”獎項=“一併輸入，等號左右不需空白\n3.🔐➛資格名單= [@user]：請連同“資格名單=”一併輸入，等號右側需空一格才能標記\n4.🔐➛開獎人數=[人數]：請連同“開獎人數=”一同輸入，等號左右不需空白\n5.結果將會在20秒後出爐\nps.輸入“抽獎”玩玩看就會囉，屆時機器人會一步步引導~'
-                command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛天氣=[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n{auth_str}\n\n—————抽獎功能—————\n🔐➛抽獎範例：輸入後請直接複製範本並修改括號內容'
+                command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛天氣=[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n{auth_str}'
 
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=command))
@@ -293,23 +257,6 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
 
-        # 天氣預報
-        # elif message in [i for i in cityId_lst]:
-        #     if group_enable(gid):
-        #         if switch_checker(gid, 'weather_switch'):
-        #             city = [v[0] for k, v in cityId_dict.items()
-        #                     if event.message.text in v]
-        #             # key = [int(k) for k, v in cityId_dict.items() if event.message.text in v]
-        #             weather_res = weather(city[0])
-        #             line_bot_api.reply_message(
-        #                 event.reply_token, TextSendMessage(text=f'{weather_res}'))
-        #         else:
-        #             line_bot_api.reply_message(event.reply_token, TextSendMessage(
-        #                 text=f'❌天氣預報功能未開啟'))
-        #     else:
-        #         line_bot_api.reply_message(
-        #             event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-
         elif "查管理員" == message:
             if group_enable(gid):
                 managers_list = []
@@ -348,12 +295,12 @@ def handle_message(event):
                     elif record == '天氣':
                         return_res = switch_on_off(
                             gid, open_close, 'weather_switch', record)
-                    elif record == '抽獎':
-                        return_res = switch_on_off(
-                            gid, open_close, 'lottery_switch', record)
-                    elif record == '入群歡迎圖':
-                        return_res = switch_on_off(
-                            gid, open_close, 'member_joined_figure_switch', record)
+                    # elif record == '抽獎':
+                    #     return_res = switch_on_off(
+                    #         gid, open_close, 'lottery_switch', record)
+                    # elif record == '入群歡迎圖':
+                    #     return_res = switch_on_off(
+                    #         gid, open_close, 'member_joined_figure_switch', record)
                     line_bot_api.reply_message(event.reply_token, TextSendMessage(
                         text=return_res))
                 else:
@@ -417,83 +364,11 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
 
-        elif '入群歡迎圖=' in message:
-            if group_enable(gid):
-                if manager_check(gid, uid):
-                    if switch_checker(gid, 'member_joined_figure_switch'):
-                        welcome_figure = message.split('=')[1]
-                        group_id_table.update_one({'_id': gid}, {
-                            "$set": {"member_joined_figure": welcome_figure}})
-                        line_bot_api.reply_message(
-                            event.reply_token, TextSendMessage(text=f'🙌已成功設定入群歡迎圖'))
-                    else:
-                        line_bot_api.reply_message(
-                            event.reply_token, TextSendMessage(text=f'❌入群歡迎圖功能未開啟\n'))
-                else:
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
-            else:
-                line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-
-        elif '抽獎範例' == message:
-            if group_enable(gid):
-                if manager_check(gid, uid):
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text='=== 抽獎 ===\n獎項\n{輸入獎項}\n\n資格名單\n{@user1 @user2}\n\n開獎人數\n{數量}'))
-                else:
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
-            else:
-                line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-
-        elif '=== 抽獎 ===' in message:
-            if group_enable(gid):
-                if manager_check(gid, uid):
-                    if switch_checker(gid, 'lottery_switch'):
-                        # line_bot_api.reply_message(
-                        #     event.reply_token, TextSendMessage(text=f'獎項=?'))
-                        # push_thread = Thread(
-                        #     target=lottery_push_message, args=(gid, 'item'))
-                        # push_thread.start()
-                        split_message = message.splitlines()
-                        item = split_message[2]
-                        print(item)
-                        candidate_lst = split_message[5].split(' ')
-                        print(candidate_lst)
-                        win_count = split_message[8]
-                        print(win_count)
-                        line_bot_api.reply_message(
-                            event.reply_token, TextSendMessage(text=f'🔥抽獎結果將在20秒後公布!\n🔥請耐心等候~~~~'))
-                        lottery_thread = Thread(target=lottery, args=(
-                            gid, item, candidate_lst, win_count))
-                        lottery_thread.start()
-                        lottery(gid, item, candidate_lst, win_count)
-                    else:
-                        line_bot_api.reply_message(
-                            event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
-                else:
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
-            else:
-                line_bot_api.reply_message(
-                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-        # elif '獎項=' in message:
+        # elif '抽獎範例' == message:
         #     if group_enable(gid):
         #         if manager_check(gid, uid):
-        #             if switch_checker(gid, 'lottery_switch'):
-        #                 item = message.split('=')[1]
-        #                 group_id_table.update_one(
-        #                     {'_id': gid}, {"$set": {"lottery_item": item}})
-        #                 line_bot_api.reply_message(
-        #                     event.reply_token, TextSendMessage(text=f'資格名單=?'))
-        #                 push_thread = Thread(
-        #                     target=lottery_push_message, args=(gid, 'candidate'))
-        #                 push_thread.start()
-        #             else:
-        #                 line_bot_api.reply_message(
-        #                     event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
+        #             line_bot_api.reply_message(
+        #                 event.reply_token, TextSendMessage(text='=== 抽獎 ===\n獎項\n{輸入獎項}\n\n資格名單\n{@user1 @user2}\n\n開獎人數\n{數量}'))
         #         else:
         #             line_bot_api.reply_message(
         #                 event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
@@ -501,56 +376,28 @@ def handle_message(event):
         #         line_bot_api.reply_message(
         #             event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
 
-        # elif '資格名單=' in message:
+        # elif '=== 抽獎 ===' in message:
         #     if group_enable(gid):
         #         if manager_check(gid, uid):
         #             if switch_checker(gid, 'lottery_switch'):
-        #                 m = message.split('=')[1]
-        #                 name_lst = m.split('@')[1:]
-        #                 print(name_lst)
-        #                 if len(name_lst) == 0:
-        #                     line_bot_api.reply_message(
-        #                         event.reply_token, TextSendMessage(text='⚠️指令不明確'))
-        #                 else:
-        #                     for i in name_lst:
-        #                         i.strip()
-        #                         group_id_table.update_one({'_id': gid}, {
-        #                             "$push": {"lottery_candidate": i.rstrip()}})
-        #                 line_bot_api.reply_message(
-        #                     event.reply_token, TextSendMessage(text=f'開獎人數=?'))
-        #                 push_thread = Thread(
-        #                     target=lottery_push_message, args=(gid, 'count'))
-        #                 push_thread.start()
-        #             else:
-        #                 line_bot_api.reply_message(
-        #                     event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
-        #         else:
-        #             line_bot_api.reply_message(
-        #                 event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
-        #     else:
-        #         line_bot_api.reply_message(
-        #             event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-
-        # elif '開獎人數=' in message:
-        #     if group_enable(gid):
-        #         if manager_check(gid, uid):
-        #             if switch_checker(gid, 'lottery_switch'):
-        #                 win_count = message.split('=')[1]
-        #                 group_id_table.update_one(
-        #                     {'_id': gid}, {"$set": {"lottery_win_count": win_count}})
+        #                 # line_bot_api.reply_message(
+        #                 #     event.reply_token, TextSendMessage(text=f'獎項=?'))
+        #                 # push_thread = Thread(
+        #                 #     target=lottery_push_message, args=(gid, 'item'))
+        #                 # push_thread.start()
+        #                 split_message = message.splitlines()
+        #                 item = split_message[2]
+        #                 print(item)
+        #                 candidate_lst = split_message[5].split(' ')
+        #                 print(candidate_lst)
+        #                 win_count = split_message[8]
+        #                 print(win_count)
         #                 line_bot_api.reply_message(
         #                     event.reply_token, TextSendMessage(text=f'🔥抽獎結果將在20秒後公布!\n🔥請耐心等候~~~~'))
-        #                 lottery_res = group_id_table.find({'_id': gid})
-        #                 lottery_item = ''
-        #                 lottery_candidate = ''
-        #                 lottery_win_count = ''
-        #                 for i in lottery_res:
-        #                     lottery_item = i['lottery_item']
-        #                     lottery_candidate = i['lottery_candidate']
-        #                     # lottery_win_count = i['lottery_win_count']
-        #                 push_thread = Thread(
-        #                     target=lottery, args=(gid, lottery_item, lottery_candidate, win_count))
-        #                 push_thread.start()
+        #                 lottery_thread = Thread(target=lottery, args=(
+        #                     gid, item, candidate_lst, win_count))
+        #                 lottery_thread.start()
+        #                 lottery(gid, item, candidate_lst, win_count)
         #             else:
         #                 line_bot_api.reply_message(
         #                     event.reply_token, TextSendMessage(text=f'❌抽獎功能未開啟\n'))
@@ -590,50 +437,254 @@ def handle_message(event):
         print(Exception)
 
 
-def lottery_push_message(gid, case):
-    headers = {"content-type": "application/json; charset=UTF-8",
-               'Authorization': 'Bearer {}'.format(access_token)}
-    res = ''
-    if case == 'item':
-        res = f'請複製上列訊息並輸入獎項取代問號\n範例輸入如下⬇⬇⬇\n獎項=3000現金'
-    elif case == 'candidate':
-        res = f'請複製上列訊息並標記tag資格人以取代問號\n範例輸入如下⬇⬇⬇\n資格名單= @user1 @user2 @user3...'
-    elif case == 'count':
-        res = f'請複製上列訊息並輸入開獎人數取代問號\n範例輸入如下⬇⬇⬇\n開獎人數=1'
+def oilPrice():
+    web = requests.get('https://gas.goodlife.tw/')
+    soup = BeautifulSoup(web.content, "html.parser")
+
+    web.close()
+
+    cpc = soup.find_all('div', id='cpc')[0]  # 中油油價
+    fpg = soup.find_all('div', id='cpc')[1]  # 台塑油價
+    cpc_res = cpc.find_all('li')
+    fpg_res = fpg.find_all('li')
+
+    cpc_list = []
+    fpg_list = []
+    for i in cpc_res:
+        if i:
+            cpc_list.append(i.text.strip().replace('\n', '').split(':')[1])
+
+    for j in fpg_res:
+        if j:
+            fpg_list.append(j.text.strip().replace('\n', '').split(':')[1])
+
+    res_str = f'📅今日油價\n\n⛽今日中油油價\n92無鉛: {cpc_list[0]}元\n95無鉛: {cpc_list[1]}元\n98無鉛: {cpc_list[2]}元\n柴油: {cpc_list[3]}元\n\n⛽今日台塑油價\n92無鉛: {fpg_list[0]}元\n95無鉛: {fpg_list[1]}元\n98無鉛: {fpg_list[2]}元\n柴油: {fpg_list[3]}元'
+    return res_str
+
+
+def exchangeRate():
+    web = requests.get('https://rate.bot.com.tw/xrt?Lang=zh-TW')
+    soup = BeautifulSoup(web.content, "html.parser")
+
+    web.close()
+
+    rate = soup.find_all(
+        'td', {'class': 'text-right display_none_print_show print_width'})
+
+    # cash_rate[0, 1, 2, 7, 11, 14, 15, 18]
+    # countries = ['USD', 'HKD', 'GBP', 'JPY', 'THB', 'EUR', 'KRW', 'CNY']
+
+    lst = []
+    for i in rate:
+        if i:
+            lst.append(i.text.strip())
+
+    # lst = convert_1d_to_2d(lst, 4)
+
+    lst = [lst[i:i + 4] for i in range(0, len(lst), 4)]
+
+    matrix = []
+    # len(lst) = 19
+    for ele in range(len(lst)):
+        if ele == 0 or ele == 1 or ele == 2 or ele == 7 or ele == 11 or ele == 14 or ele == 15 or ele == 18:
+            matrix.append(lst[ele])
+
+    res = f'💱最新匯率\n\n🇺🇸美金(USD)\n現金買入:{matrix[0][0]}\n現金賣出:{matrix[0][1]}\n即期買入:{matrix[0][2]}\n即期賣出:{matrix[0][3]}\n\n🇭🇰港幣(HKD)\n現金買入:{matrix[1][0]}\n現金賣出:{matrix[1][1]}\n即期買入:{matrix[1][2]}\n即期賣出:{matrix[1][3]}\n\n🇯🇵日元(JPY)\n現金買入:{matrix[3][0]}\n現金賣出:{matrix[3][1]}\n即期買入:{matrix[3][2]}\n即期賣出:{matrix[3][3]}\n\n🇹🇭泰銖(THB)\n現金買入:{matrix[4][0]}\n現金賣出:{matrix[4][1]}\n即期買入:{matrix[4][2]}\n即期賣出:{matrix[4][3]}\n\n🇪🇺歐元(EUR)\n現金買入:{matrix[5][0]}\n現金賣出:{matrix[5][1]}\n即期買入:{matrix[5][2]}\n即期賣出:{matrix[5][3]}\n\n🇰🇷韓元(KRW)\n現金買入:{matrix[6][0]}\n現金賣出:{matrix[6][1]}\n即期買入:{matrix[6][2]}\n即期賣出:{matrix[6][3]}\n\n🇨🇳人民幣(CNY)\n現金買入:{matrix[7][0]}\n現金賣出:{matrix[7][1]}\n即期買入:{matrix[7][2]}\n即期賣出:{matrix[7][3]}'
+    return res
+
+
+def zodiacSigns(key):
+    today = datetime.date.today()
+    d_sign = {
+        0: '牡羊座', 1: '金牛座', 2: '雙子座', 3: '巨蟹座', 4: '獅子座', 5: '處女座', 6: '天秤座', 7: '天蠍座', 8: '射手座', 9: '摩羯座', 10: '水瓶座', 11: '雙魚座'
+    }
+    d_logo = {
+        0: '♈', 1: '♉', 2: '♊', 3: '♋', 4: '♌', 5: '♍', 6: '♎', 7: '♏', 8: '♐', 9: '♑', 10: '♒', 11: '♓'
+    }
+    sign = ''
+    logo = ''
+    for k, val in d_sign.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+        if key == k:
+            sign = val
+    for k, val in d_logo.items():
+        if key == k:
+            logo = val
+
+    web = requests.get(
+        f'https://astro.click108.com.tw/daily_{key}.php?iAcDay={today}&iAstro={key}')
+
+    soup = BeautifulSoup(web.content, "html.parser")
+
+    # close requests
+    web.close()
+
+    today_lucky = soup.find('div', {'class': 'TODAY_LUCKY'})
+    lucky_set = today_lucky.find_all('h4')
+
+    lucky_lst = []
+    for j in lucky_set:
+        if j:
+            lucky_lst.append(j.text.strip())
+
+    today_word = soup.find('div', {'class': 'TODAY_WORD'})
+    today_word = today_word.find('p')
+    # print(today_word)
+    today_total = soup.find('div', {'class': 'TODAY_CONTENT'})
+
+    total_text = today_total.find_all('p')
+    total_res = []
+    for i in total_text:
+        if i:
+            total_res.append(i.text.strip())
+    res = f'〖{today}〗\n{logo}{sign}星座運勢\n\n📝短評: {today_word.text.strip()}\n\n🔥今日{sign}完整解析\n\n🔢幸運數字: {lucky_lst[0]}\n🎨幸運顏色: {lucky_lst[1]}\n🌎開運方位: {lucky_lst[2]}\n🕰良辰吉時: {lucky_lst[3]}\n🍀幸運星座: {lucky_lst[4]}\n\n'
+    for i in range(len(total_res)):
+        res += f'{total_res[i]}\n'
+    # res += f'{total_text.text.strip()}'
+    return res
+
+
+def weather(city):
+    web = requests.get(
+        f'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-8F31035E-1873-4255-BF9C-44C035507136')
+    web_json = web.json()
+    web.close()
+    locations = web_json['records']['location']
+
+    # 3個array裡面的值都是以下順序：[天氣描述, 降雨機率, 最低溫, 舒適度, 最高溫]
+    first_timming = []
+    second_timming = []
+    third_timming = []
+    start_time0 = ''
+    start_time1 = ''
+    start_time2 = ''
+    end_time0 = ''
+    end_time1 = ''
+    end_time2 = ''
+    for i in locations:
+        if city == i['locationName']:
+            for j in i['weatherElement']:
+                start_time0 = j['time'][0]['startTime'][5:-3]
+                end_time0 = j['time'][0]['endTime'][5:-3]
+                start_time1 = j['time'][1]['startTime'][5:-3]
+                end_time1 = j['time'][1]['endTime'][5:-3]
+                start_time2 = j['time'][2]['startTime'][5:-3]
+                end_time2 = j['time'][2]['endTime'][5:-3]
+                first_timming.append(
+                    j['time'][0]['parameter']['parameterName'])
+                second_timming.append(
+                    j['time'][1]['parameter']['parameterName'])
+                third_timming.append(
+                    j['time'][2]['parameter']['parameterName'])
+
+    res = f'〖{city} 36小時天氣預報〗\n\n[{start_time0}~{end_time0}]\n天氣現象: {first_timming[0]}\n降雨率: {first_timming[1]}%\n溫度: {first_timming[2]}°C~{first_timming[4]}°C\n舒適度: {first_timming[3]}\n\n[{start_time1}~{end_time1}]\n天氣現象: {second_timming[0]}\n降雨率: {second_timming[1]}%\n溫度: {second_timming[2]}°C~{second_timming[4]}°C\n舒適度: {second_timming[3]}\n\n[{start_time2}~{end_time2}]\n天氣現象: {third_timming[0]}\n降雨率: {third_timming[1]}%\n溫度: {third_timming[2]}°C~{third_timming[4]}°C\n舒適度: {third_timming[3]}'
+
+    return res
+
+
+def group_enable(group_id):
+    res = group_id_table.find({'_id': group_id})
+    for i in res:
+        if i['state'] == '0':
+            return False
+        else:
+            return True
+
+
+def get_image_url(gid):
+    figure_res = group_id_table.find({'_id': gid})
+    print(figure_res)
+    for i in figure_res:
+        return i['member_joined_figure']
+
+
+def switch_checker(gid, record):
+    res = group_id_table.find({'_id': gid})
+    for i in res:
+        if i[record] == '1':
+            return True
+        else:
+            return False
+
+
+def switch_on_off(gid, open_close, key, record):
+    if open_close == '0':
+        group_id_table.update_one({'_id': gid}, {"$set": {key: open_close}})
+        return f'😔{record} 功能已關閉'
+    elif open_close == '1':
+        group_id_table.update_one({'_id': gid}, {"$set": {key: open_close}})
+        return f'🔥{record} 功能已開啟'
     else:
-        res = f'⚠️指令不明確，請再輸入一次'
-
-    body = {
-        'to': gid,
-        'messages': [{
-            'type': 'text',
-            'text': res
-        }]
-    }
-    req = requests.request('POST', 'https://api.line.me/v2/bot/message/push',
-                           headers=headers, data=json.dumps(body).encode('utf-8'))
+        return '指令不明確'
 
 
-def lottery(gid, item, candidate_lst, win_count):
-    winner_lst = random.sample(candidate_lst, int(win_count))
-    winner_str = ''
-    for i in winner_lst:
-        winner_str += f'@{i} '
-    time.sleep(20)
+def manager_check(group_id, user_id):
     headers = {"content-type": "application/json; charset=UTF-8",
                'Authorization': 'Bearer {}'.format(access_token)}
-    body = {
-        'to': gid,
-        'messages': [{
-            'type': 'text',
-            'text': f'🔥🔥抽獎結果出爐🔥🔥\n\n恭喜以下成員抽中 {item}\n\n{winner_str}'
-        }]
-    }
+    profile = requests.get('https://api.line.me/v2/bot/group/' +
+                           group_id + "/member/" + user_id, headers=headers)
+    profile = profile.json()
+    user_name = profile['displayName']
+    for i in group_id_table.find():
+        if group_id == i['_id']:
+            for j in i['group_managers']:
+                if user_name == j:
+                    return True
+            return False
 
-    # 向指定網址發送 request
-    req = requests.request('POST', 'https://api.line.me/v2/bot/message/push',
-                           headers=headers, data=json.dumps(body).encode('utf-8'))
-    print(req)
+
+def list_managers(gid):
+    managers = []
+    manager_res = group_id_table.find({'_id': gid})
+    for i in manager_res:
+        return i['group_managers']
+    #     for j in i['group_managers']:
+    #         managers.append(j)
+    # return managers
+
+
+def authenticated_check(gid, uname, code):
+    if group_enable(gid):
+        return '⚠️此群組已註冊過'
+    else:
+        res = authenticaiton_code_table.find({'_id': code})
+        for i in res:
+            if i['enable'] == '0':
+                # 更新授權碼狀態，避免重複使用
+                authenticaiton_code_table.update_one(
+                    {'_id': code}, {"$set": {"enable": "1"}})
+                # 更新群組狀態，使群組成為已註冊用戶
+                group_id_table.update_one({'_id': gid}, {
+                    "$set": {"state": "1"}})
+                # 將授權碼註冊在code欄位以便紀錄
+                group_id_table.update_one({'_id': gid}, {
+                    "$set": {"authentication_code": code}})
+                # 將群組管理員
+                group_id_table.update_one({'_id': gid}, {"$push": {
+                    "group_managers": uname}})
+                return f'🙌群組註冊成功!\n並已將{uname}設定為本群管理員'
+        return '❌不正確或已註冊過的授權碼'
+
+
+# def lottery(gid, item, candidate_lst, win_count):
+#     winner_lst = random.sample(candidate_lst, int(win_count))
+#     winner_str = ''
+#     for i in winner_lst:
+#         winner_str += f'{i} '
+#     time.sleep(20)
+#     headers = {"content-type": "application/json; charset=UTF-8",
+#                'Authorization': 'Bearer {}'.format(access_token)}
+#     body = {
+#         'to': gid,
+#         'messages': [{
+#             'type': 'text',
+#             'text': f'🔥🔥抽獎結果出爐🔥🔥\n\n恭喜以下成員抽中 {item}\n\n{winner_str}'
+#         }]
+#     }
+
+#     # 向指定網址發送 request
+#     req = requests.request('POST', 'https://api.line.me/v2/bot/message/push',
+#                            headers=headers, data=json.dumps(body).encode('utf-8'))
+#     print(req)
 
 
 if __name__ == "__main__":
