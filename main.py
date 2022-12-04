@@ -166,6 +166,9 @@ cityId_lst = ['台北市', '臺北市', '台北', '臺北', '高雄市', '高雄
               '屏東縣', '屏東', '宜蘭縣', '宜蘭', '花蓮縣', '花蓮', '台東縣', '臺東縣',
               '台東', '臺東', '澎湖縣', '澎湖', '金門縣', '金門', '新竹市', '新竹']
 
+cities = ['台北市', '臺北市', '高雄市', '新北市', '台中市', '臺中市', '台南市', '臺南市', '桃園市', '新竹縣', '苗栗縣', '彰化縣',
+          '南投縣', '雲林縣', '嘉義市', '嘉義縣', '基隆市', '屏東縣', '宜蘭縣', '花蓮縣', '台東縣', '臺東縣', '澎湖縣', '金門縣', '新竹市']
+
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
@@ -180,17 +183,35 @@ def handle_message(event):
             line_bot_api.reply_message(
                 event.reply_token, TextSendMessage(text=res_txt))
 
+        elif 'shine' == message or 'Shine' == message:
+            if group_enable(gid):
+                template_json = json.dumps(template_message)
+                loaded_r = json.loads(template_json)
+                line_bot_api.reply_message(
+                    event.reply_token, FlexSendMessage(alt_text='shine', contents=loaded_r))
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+
         elif '/help' == message:
             if group_enable(gid):
-                weather_str = '💡[縣市]可輸入2~3個字之縣市名稱，提供全台22個行政縣市查詢\n範例輸入1:天氣=台北\n範例輸入2:天氣=新竹縣\nps.等號左右不需空白'
-                zodiac_str = '💡[星座]可用1~3個字查詢12星座，\n範例輸入1:射\n範例輸入2:巨蟹\n範例輸入3：天蠍座'
+                weather_str = '💡[縣市]需輸入3個字之縣市名稱，提供全台22個行政縣市查詢\n範例輸入1:台北市\n範例輸入2:臺北市\n範例輸入3:新竹縣'
+                zodiac_str = '💡[星座]可輸入1~3個字查詢12星座，\n範例輸入1:射\n範例輸入2:巨蟹\n範例輸入3：天蠍座'
                 func_str = '💡[功能]可輸入：油價、匯率、星座、天氣、抽獎\n範例輸入1：油價 開\n範例輸入2：抽獎 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
                 auth_str = '💡[user]內可標記連續標記\n輸入範例1：新增管理員 @user1 @user2 @user3\n輸入範例2：刪除管理員 @user1 @user2\nps.輸入完新增(或刪除)管理員後，需空一格再開始標記'
                 # lottery_v1 = '請依循步驟：\n1.🔐➛抽獎：此時機器人將請你輸入獎項\n2.🔐➛獎項=[您的獎項]：請連同”獎項=“一併輸入，等號左右不需空白\n3.🔐➛資格名單= [@user]：請連同“資格名單=”一併輸入，等號右側需空一格才能標記\n4.🔐➛開獎人數=[人數]：請連同“開獎人數=”一同輸入，等號左右不需空白\n5.結果將會在20秒後出爐\nps.輸入“抽獎”玩玩看就會囉，屆時機器人會一步步引導~'
-                command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛天氣=[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n{auth_str}'
+                command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛shine：可顯示所有查詢功能\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n{auth_str}'
 
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=command))
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+
+        elif "查天氣" == message:
+            if group_enable(gid):
+                line_bot_api.reply_message(
+                    event.reply_token, TextSendMessage(text=f'請輸入完整縣市名稱(三個字)\nex. 台北市, 新竹縣'))
             else:
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
@@ -239,13 +260,12 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
 
-        elif '天氣=' in message:
+        # 天氣預報
+        elif message in [i for i in cities]:
             if group_enable(gid):
                 if switch_checker(gid, 'weather_switch'):
-                    m = message.split('=')[1]
-                    print(m)
                     city = [v[0] for k, v in cityId_dict.items()
-                            if m in v]
+                            if message in v]
                     print(city)
                     weather_res = weather(city[0])
                     line_bot_api.reply_message(
@@ -664,6 +684,418 @@ def authenticated_check(gid, uname, code):
                 return f'🙌群組註冊成功!\n並已將{uname}設定為本群管理員'
         return '❌不正確或已註冊過的授權碼'
 
+
+template_message = {
+    "type": "bubble",
+    "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+            {
+                "type": "text",
+                "text": "SHINE多功能整合機器人\n如有異常問題請回報作者",
+                "weight": "regular",
+                "color": "#1DB666",
+                "size": "md",
+                "style": "normal",
+                "decoration": "none",
+                "position": "relative",
+                "wrap": True,
+                "margin": "none",
+                "align": "center",
+                "offsetBottom": "md"
+            },
+            {
+                "type": "separator",
+                "margin": "md"
+            },
+            {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "抽各式圖",
+                        "align": "center",
+                        "margin": "md",
+                        "size": "md",
+                        "color": "#000000"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "隨機抽",
+                                    "text": "隨機抽"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "margin": "none",
+                                "position": "relative",
+                                "color": "#e1cbb1"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽JKF",
+                                    "text": "抽JKF"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#e1cbb1"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽女郎",
+                                    "text": "抽女郎"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#e1cbb1"
+                            }
+                        ],
+                        "spacing": "sm"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽奶",
+                                    "text": "抽奶"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#e1cbb1"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽大奶",
+                                    "text": "抽大奶"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#e1cbb1"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽正妹",
+                                    "text": "抽正妹"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#e1cbb1"
+                            }
+                        ],
+                        "spacing": "sm"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽美女",
+                                    "text": "抽美女"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#e1cbb1"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽帥哥",
+                                    "text": "抽帥哥"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#e1cbb1"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "抽鮮肉",
+                                    "text": "抽鮮肉"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#e1cbb1"
+                            }
+                        ],
+                        "spacing": "sm"
+                    }
+                ],
+                "position": "relative",
+                "spacing": "md"
+            },
+            {
+                "type": "separator",
+                "margin": "xl"
+            },
+            {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "本日星座運勢",
+                        "align": "center",
+                        "margin": "md",
+                        "size": "md"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "牡羊座",
+                                    "text": "牡羊座"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "margin": "none",
+                                "position": "relative",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "金牛座",
+                                    "text": "金牛座"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "雙子座",
+                                    "text": "雙子座"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#d1b28c"
+                            }
+                        ],
+                        "spacing": "sm"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "巨蟹座",
+                                    "text": "巨蟹座"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "獅子座",
+                                    "text": "獅子座"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "處女座",
+                                    "text": "處女座"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#d1b28c"
+                            }
+                        ],
+                        "spacing": "sm"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "天秤座",
+                                    "text": "天秤座"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "天蠍座",
+                                    "text": "天蠍座"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "射手座",
+                                    "text": "射手座"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#d1b28c"
+                            }
+                        ],
+                        "spacing": "sm"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "摩羯座",
+                                    "text": "摩羯座"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "水瓶座",
+                                    "text": "hello"
+                                },
+                                "style": "secondary",
+                                "height": "sm",
+                                "color": "#d1b28c"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "雙魚座",
+                                    "text": "雙魚座"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#d1b28c"
+                            }
+                        ],
+                        "spacing": "sm"
+                    }
+                ],
+                "position": "relative",
+                "spacing": "md"
+            },
+            {
+                "type": "separator",
+                "margin": "xl"
+            },
+            {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "其他加值查詢服務",
+                        "margin": "md",
+                        "size": "md",
+                        "align": "center"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "查油價",
+                                    "text": "查油價"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#bf9a68"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "查匯率",
+                                    "text": "查匯率"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#bf9a68"
+                            },
+                            {
+                                "type": "button",
+                                "action": {
+                                    "type": "message",
+                                    "label": "查天氣",
+                                    "text": "查天氣"
+                                },
+                                "height": "sm",
+                                "style": "secondary",
+                                "color": "#bf9a68"
+                            }
+                        ],
+                        "spacing": "sm"
+                    }
+                ],
+                "position": "relative",
+                "spacing": "md"
+            }
+        ],
+        "backgroundColor": "#FFFFF0"
+    },
+    "styles": {
+        "footer": {
+            "separator": True
+        }
+    }
+}
 
 # def lottery(gid, item, candidate_lst, win_count):
 #     winner_lst = random.sample(candidate_lst, int(win_count))
