@@ -106,7 +106,7 @@ def zodiacSigns(key):
     for i in range(len(total_res)):
         res += f'{total_res[i]}\n'
     # res += f'{total_text.text.strip()}'
-    return res
+    return res.rstrip()
 
 
 def weather(city):
