@@ -47,6 +47,7 @@ mongoClient = pymongo.MongoClient(
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
+zodiac_sign_table = groupMagt['zodiac_sign']
 
 headers = {"content-type": "application/json; charset=UTF-8",
            'Authorization': 'Bearer {}'.format(access_token)}
@@ -280,10 +281,13 @@ def handle_message(event):
                         line_bot_api.reply_message(event.reply_token, TextSendMessage(
                             text=f'❌星座運勢功能未開啟'))
                     else:
-                        zodiacSigns_res = ''
                         key = [int(k) for k, v in zodiacSigns_dict.items()
-                               if event.message.text in v]
-                        zodiacSigns_res = zodiacSigns(int(key[0]))
+                               if message in v]
+                        zodiacSigns_obj = zodiac_sign_table.find(
+                            {'_id': str(key[0])})
+                        zodiacSigns_res = ''
+                        for r in zodiacSigns_obj:
+                            zodiacSigns_res = r['res']
                         line_bot_api.reply_message(
                             event.reply_token, TextSendMessage(text=f'{zodiacSigns_res}'))
 
@@ -497,56 +501,6 @@ def exchangeRate():
             matrix.append(lst[ele])
 
     res = f'💱最新匯率\n\n🇺🇸美金(USD)\n現金買入:{matrix[0][0]}\n現金賣出:{matrix[0][1]}\n即期買入:{matrix[0][2]}\n即期賣出:{matrix[0][3]}\n\n🇭🇰港幣(HKD)\n現金買入:{matrix[1][0]}\n現金賣出:{matrix[1][1]}\n即期買入:{matrix[1][2]}\n即期賣出:{matrix[1][3]}\n\n🇯🇵日元(JPY)\n現金買入:{matrix[3][0]}\n現金賣出:{matrix[3][1]}\n即期買入:{matrix[3][2]}\n即期賣出:{matrix[3][3]}\n\n🇹🇭泰銖(THB)\n現金買入:{matrix[4][0]}\n現金賣出:{matrix[4][1]}\n即期買入:{matrix[4][2]}\n即期賣出:{matrix[4][3]}\n\n🇪🇺歐元(EUR)\n現金買入:{matrix[5][0]}\n現金賣出:{matrix[5][1]}\n即期買入:{matrix[5][2]}\n即期賣出:{matrix[5][3]}\n\n🇰🇷韓元(KRW)\n現金買入:{matrix[6][0]}\n現金賣出:{matrix[6][1]}\n即期買入:{matrix[6][2]}\n即期賣出:{matrix[6][3]}\n\n🇨🇳人民幣(CNY)\n現金買入:{matrix[7][0]}\n現金賣出:{matrix[7][1]}\n即期買入:{matrix[7][2]}\n即期賣出:{matrix[7][3]}'
-    return res
-
-
-def zodiacSigns(key):
-    today = datetime.date.today()
-    d_sign = {
-        0: '牡羊座', 1: '金牛座', 2: '雙子座', 3: '巨蟹座', 4: '獅子座', 5: '處女座', 6: '天秤座', 7: '天蠍座', 8: '射手座', 9: '摩羯座', 10: '水瓶座', 11: '雙魚座'
-    }
-    d_logo = {
-        0: '♈', 1: '♉', 2: '♊', 3: '♋', 4: '♌', 5: '♍', 6: '♎', 7: '♏', 8: '♐', 9: '♑', 10: '♒', 11: '♓'
-    }
-    sign = ''
-    logo = ''
-    for k, val in d_sign.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
-        if key == k:
-            sign = val
-    for k, val in d_logo.items():
-        if key == k:
-            logo = val
-
-    web = requests.get(
-        f'https://astro.click108.com.tw/daily_{key}.php?iAcDay={today}&iAstro={key}')
-
-    soup = BeautifulSoup(web.content, "html.parser")
-
-    # close requests
-    web.close()
-
-    today_lucky = soup.find('div', {'class': 'TODAY_LUCKY'})
-    lucky_set = today_lucky.find_all('h4')
-
-    lucky_lst = []
-    for j in lucky_set:
-        if j:
-            lucky_lst.append(j.text.strip())
-
-    today_word = soup.find('div', {'class': 'TODAY_WORD'})
-    today_word = today_word.find('p')
-    # print(today_word)
-    today_total = soup.find('div', {'class': 'TODAY_CONTENT'})
-
-    total_text = today_total.find_all('p')
-    total_res = []
-    for i in total_text:
-        if i:
-            total_res.append(i.text.strip())
-    res = f'〖{today}〗\n{logo}{sign}星座運勢\n\n📝短評: {today_word.text.strip()}\n\n🔥今日{sign}完整解析\n\n🔢幸運數字: {lucky_lst[0]}\n🎨幸運顏色: {lucky_lst[1]}\n🌎開運方位: {lucky_lst[2]}\n🕰良辰吉時: {lucky_lst[3]}\n🍀幸運星座: {lucky_lst[4]}\n\n'
-    for i in range(len(total_res)):
-        res += f'{total_res[i]}\n'
-    # res += f'{total_text.text.strip()}'
     return res
 
 
