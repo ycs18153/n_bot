@@ -48,6 +48,7 @@ groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
 zodiac_sign_table = groupMagt['zodiac_sign']
+images_table = groupMagt['images']
 
 headers = {"content-type": "application/json; charset=UTF-8",
            'Authorization': 'Bearer {}'.format(access_token)}
@@ -99,6 +100,8 @@ def bot_join(event):
         'weather_switch': '1',
         'authentication_code': '',
     })
+    txt = '請輸入「功能表」即可查看機器使用及功能。\n\n如要開通上鎖的功能，請聯繫以下LINE ID:n0715.(一個點)'
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=txt))
 
 
 zodiacSigns_dict = {
@@ -221,12 +224,57 @@ def handle_message(event):
                 else:
                     weather_str = '💡[縣市]需輸入3個字之縣市名稱，提供全台22個行政縣市查詢\n範例輸入1:台北市\n範例輸入2:臺北市\n範例輸入3:新竹縣'
                     zodiac_str = '💡[星座]可輸入1~3個字查詢12星座，\n範例輸入1:射\n範例輸入2:巨蟹\n範例輸入3：天蠍座'
-                    func_str = '💡[功能]可輸入：油價、匯率、星座、天氣、抽獎\n範例輸入1：油價 開\n範例輸入2：抽獎 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
+                    func_str = '💡[功能]可輸入：油價、匯率、星座、天氣\n範例輸入1：油價 開\n範例輸入2：天氣 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
                     auth_str = '💡[user]內可標記連續標記\n輸入範例1：新增管理員 @user1 @user2 @user3\n輸入範例2：刪除管理員 @user1 @user2\nps.輸入完新增(或刪除)管理員後，需空一格再開始標記'
                     # lottery_v1 = '請依循步驟：\n1.🔐➛抽獎：此時機器人將請你輸入獎項\n2.🔐➛獎項=[您的獎項]：請連同”獎項=“一併輸入，等號左右不需空白\n3.🔐➛資格名單= [@user]：請連同“資格名單=”一併輸入，等號右側需空一格才能標記\n4.🔐➛開獎人數=[人數]：請連同“開獎人數=”一同輸入，等號左右不需空白\n5.結果將會在20秒後出爐\nps.輸入“抽獎”玩玩看就會囉，屆時機器人會一步步引導~'
-                    command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛shine：可顯示所有查詢功能\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n{auth_str}'
+                    command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛功能表：可顯示所有查詢功能\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n\n{auth_str}'
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=command))
+
+        elif "抽JKF" == message:
+            res = group_id_table.find({'_id': gid})
+            for i in res:
+                if i['state'] == '0':
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                else:
+                    img_res = images_table.aggregate(
+                        [{'$match': {'tag': 'jkf'}}, {'$sample': {'size': 1}}])
+                    src_txt = ''
+                    for j in img_res:
+                        src_txt = j['src']
+                    line_bot_api.reply_message(event.reply_token, ImageSendMessage(
+                        original_content_url=src_txt, preview_image_url=src_txt))
+
+        elif "抽女郎" == message:
+            res = group_id_table.find({'_id': gid})
+            for i in res:
+                if i['state'] == '0':
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                else:
+                    img_res = images_table.aggregate(
+                        [{'$match': {'tag': 'jkf_girls'}}, {'$sample': {'size': 1}}])
+                    src_txt = ''
+                    for j in img_res:
+                        src_txt = j['src']
+                    line_bot_api.reply_message(event.reply_token, ImageSendMessage(
+                        original_content_url=src_txt, preview_image_url=src_txt))
+
+        elif "隨機抽" == message:
+            res = group_id_table.find({'_id': gid})
+            for i in res:
+                if i['state'] == '0':
+                    line_bot_api.reply_message(
+                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                else:
+                    img_res = images_table.aggregate(
+                        [{'$sample': {'size': 1}}])
+                    src_txt = ''
+                    for j in img_res:
+                        src_txt = j['src']
+                    line_bot_api.reply_message(event.reply_token, ImageSendMessage(
+                        original_content_url=src_txt, preview_image_url=src_txt))
 
         elif "查天氣" == message:
             res = group_id_table.find({'_id': gid})
