@@ -231,30 +231,22 @@ def handle_message(event):
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=command))
 
-        elif "抽JKF" == message:
+        elif "抽JKF" == message or "抽女郎" == message or "抽美女" == message:
             res = group_id_table.find({'_id': gid})
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
                 else:
+                    tag = ''
+                    if message == "抽JKF":
+                        tag = 'jkf'
+                    elif message == "抽女郎":
+                        tag = 'jkf_girls'
+                    elif message == "抽美女":
+                        tag = 'beauty_girls'
                     img_res = images_table.aggregate(
-                        [{'$match': {'tag': 'jkf'}}, {'$sample': {'size': 1}}])
-                    src_txt = ''
-                    for j in img_res:
-                        src_txt = j['src']
-                    line_bot_api.reply_message(event.reply_token, ImageSendMessage(
-                        original_content_url=src_txt, preview_image_url=src_txt))
-
-        elif "抽女郎" == message:
-            res = group_id_table.find({'_id': gid})
-            for i in res:
-                if i['state'] == '0':
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-                else:
-                    img_res = images_table.aggregate(
-                        [{'$match': {'tag': 'jkf_girls'}}, {'$sample': {'size': 1}}])
+                        [{'$match': {'tag': tag}}, {'$sample': {'size': 1}}])
                     src_txt = ''
                     for j in img_res:
                         src_txt = j['src']
