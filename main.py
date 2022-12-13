@@ -98,9 +98,10 @@ def bot_join(event):
         'state': '0',
         'zodiacSigns_switch': '1',
         'weather_switch': '1',
+        'lotteryImg_switch': '1',
         'authentication_code': '',
     })
-    txt = '請輸入「功能表」即可查看機器使用及功能。\n\n如要開通上鎖的功能，請聯繫以下LINE ID:n0715.(一個點)'
+    txt = 'SHINE多功能整合型機器人\n如欲開通解鎖請聯絡LINE ID\n[n0715.]———(line)—————'
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=txt))
 
 
@@ -204,81 +205,69 @@ def handle_message(event):
                         event.reply_token, TextSendMessage(text=f'❌不正確或已註冊過的授權碼'))
 
         elif '功能表' == message:
-            res = group_id_table.find({'_id': gid})
-            for i in res:
-                if i['state'] == '0':
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-                else:
-                    template_json = json.dumps(template_message)
-                    loaded_r = json.loads(template_json)
-                    line_bot_api.reply_message(
-                        event.reply_token, FlexSendMessage(alt_text='shine', contents=loaded_r))
+            template_json = json.dumps(template_message)
+            loaded_r = json.loads(template_json)
+            line_bot_api.reply_message(
+                event.reply_token, FlexSendMessage(alt_text='shine', contents=loaded_r))
 
         elif 'help' == message or 'Help' == message:
-            res = group_id_table.find({'_id': gid})
-            for i in res:
-                if i['state'] == '0':
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-                else:
-                    weather_str = '💡[縣市]需輸入3個字之縣市名稱，提供全台22個行政縣市查詢\n範例輸入1:台北市\n範例輸入2:臺北市\n範例輸入3:新竹縣'
-                    zodiac_str = '💡[星座]可輸入1~3個字查詢12星座，\n範例輸入1:射\n範例輸入2:巨蟹\n範例輸入3：天蠍座'
-                    func_str = '💡[功能]可輸入：油價、匯率、星座、天氣\n範例輸入1：油價 開\n範例輸入2：天氣 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
-                    auth_str = '💡[user]內可標記連續標記\n輸入範例1：新增管理員 @user1 @user2 @user3\n輸入範例2：刪除管理員 @user1 @user2\nps.輸入完新增(或刪除)管理員後，需空一格再開始標記'
-                    # lottery_v1 = '請依循步驟：\n1.🔐➛抽獎：此時機器人將請你輸入獎項\n2.🔐➛獎項=[您的獎項]：請連同”獎項=“一併輸入，等號左右不需空白\n3.🔐➛資格名單= [@user]：請連同“資格名單=”一併輸入，等號右側需空一格才能標記\n4.🔐➛開獎人數=[人數]：請連同“開獎人數=”一同輸入，等號左右不需空白\n5.結果將會在20秒後出爐\nps.輸入“抽獎”玩玩看就會囉，屆時機器人會一步步引導~'
-                    command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛功能表：可顯示所有查詢功能\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n\n{auth_str}'
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=command))
+            weather_str = '💡[縣市]需輸入3個字之縣市名稱，提供全台22個行政縣市查詢\n範例輸入1:台北市\n範例輸入2:臺北市\n範例輸入3:新竹縣'
+            zodiac_str = '💡[星座]可輸入1~3個字查詢12星座，\n範例輸入1:射\n範例輸入2:巨蟹\n範例輸入3：天蠍座'
+            func_str = '💡[功能]可輸入：油價、匯率、星座、天氣\n範例輸入1：油價 開\n範例輸入2：天氣 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
+            auth_str = '💡[user]內可標記連續標記\n輸入範例1：新增管理員 @user1 @user2 @user3\n輸入範例2：刪除管理員 @user1 @user2\nps.輸入完新增(或刪除)管理員後，需空一格再開始標記'
+            # lottery_v1 = '請依循步驟：\n1.🔐➛抽獎：此時機器人將請你輸入獎項\n2.🔐➛獎項=[您的獎項]：請連同”獎項=“一併輸入，等號左右不需空白\n3.🔐➛資格名單= [@user]：請連同“資格名單=”一併輸入，等號右側需空一格才能標記\n4.🔐➛開獎人數=[人數]：請連同“開獎人數=”一同輸入，等號左右不需空白\n5.結果將會在20秒後出爐\nps.輸入“抽獎”玩玩看就會囉，屆時機器人會一步步引導~'
+            command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛功能表：可顯示所有查詢功能\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n\n{auth_str}'
+            line_bot_api.reply_message(
+                event.reply_token, TextSendMessage(text=command))
 
-        elif "抽JKF" == message or "抽女郎" == message or "抽美女" == message or "抽正妹" == message or "抽奶" == message or "抽大奶" == message:
+        elif "抽JKF" == message or "抽女郎" == message or "抽美女" == message or "抽正妹" == message or "抽奶" == message or "抽大奶" == message or "抽帥哥" == message:
             res = group_id_table.find({'_id': gid})
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌目前只提供隨機抽卡功能～\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
-                    tag = ''
-                    if message == "抽JKF":
-                        tag = 'jkf'
-                    elif message == "抽女郎":
-                        tag = 'jkf_girls'
-                    elif message == "抽美女":
-                        tag = 'beauty_girls'
-                    elif message == "抽正妹":
-                        tag = 'ordinary_person'
-                    elif message == "抽奶" or message == "抽大奶":
-                        tag = 'boost'
-                    img_res = images_table.aggregate(
-                        [{'$match': {'tag': tag}}, {'$sample': {'size': 1}}])
-                    src_txt = ''
-                    for j in img_res:
-                        src_txt = j['src']
-                    print("img url: ", src_txt)
-                    line_bot_api.reply_message(event.reply_token, ImageSendMessage(
-                        original_content_url=src_txt, preview_image_url=src_txt))
+                    if i['lotteryImg_switch'] == '0':
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'❌抽卡功能未開啟'))
+                    else:
+                        tag = ''
+                        if message == "抽JKF":
+                            tag = 'jkf'
+                        elif message == "抽女郎":
+                            tag = 'jkf_girls'
+                        elif message == "抽美女":
+                            tag = 'beauty_girls'
+                        elif message == "抽正妹":
+                            tag = 'ordinary_person'
+                        elif message == "抽奶" or message == "抽大奶":
+                            tag = 'boost'
+                        elif message == "抽帥哥":
+                            tag = 'hansome'
+                        img_res = images_table.aggregate(
+                            [{'$match': {'tag': tag}}, {'$sample': {'size': 1}}])
+                        src_txt = ''
+                        for j in img_res:
+                            src_txt = j['src']
+                        print("img url: ", src_txt)
+                        line_bot_api.reply_message(event.reply_token, ImageSendMessage(
+                            original_content_url=src_txt, preview_image_url=src_txt))
 
         elif "隨機抽" == message:
-            res = group_id_table.find({'_id': gid})
-            for i in res:
-                if i['state'] == '0':
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
-                else:
-                    img_res = images_table.aggregate(
-                        [{'$sample': {'size': 1}}])
-                    src_txt = ''
-                    for j in img_res:
-                        src_txt = j['src']
-                    line_bot_api.reply_message(event.reply_token, ImageSendMessage(
-                        original_content_url=src_txt, preview_image_url=src_txt))
+            img_res = images_table.aggregate(
+                [{'$sample': {'size': 1}}])
+            src_txt = ''
+            for j in img_res:
+                src_txt = j['src']
+            line_bot_api.reply_message(event.reply_token, ImageSendMessage(
+                original_content_url=src_txt, preview_image_url=src_txt))
 
         elif "查天氣" == message:
             res = group_id_table.find({'_id': gid})
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     if i['weather_switch'] == '0':
                         line_bot_api.reply_message(
@@ -291,7 +280,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     if i['oil_switch'] == '0':
                         line_bot_api.reply_message(
@@ -305,7 +294,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     if i['exchange_switch'] == '0':
                         line_bot_api.reply_message(
@@ -342,7 +331,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     if i['weather_switch'] == '0':
                         line_bot_api.reply_message(
@@ -358,7 +347,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     managers_list = []
                     group_managers_res = '—————本群管理員—————\n'
@@ -376,7 +365,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     user_name = get_user_profile(gid, uid)
                     for j in i['group_managers']:
@@ -400,6 +389,9 @@ def handle_message(event):
                             elif record == '天氣':
                                 return_res = switch_on_off(
                                     gid, open_close, 'weather_switch', record)
+                            elif record == '抽卡':
+                                return_res = switch_on_off(
+                                    gid, open_close, 'lotteryImg_switch', record)
                             line_bot_api.reply_message(
                                 event.reply_token, TextSendMessage(text=return_res))
                     line_bot_api.reply_message(
@@ -410,7 +402,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     user_name = get_user_profile(gid, uid)
                     for j in i['group_managers']:
@@ -439,7 +431,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     user_name = get_user_profile(gid, uid)
                     for j in i['group_managers']:
@@ -470,7 +462,7 @@ def handle_message(event):
             for i in res:
                 if i['state'] == '0':
                     line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                        event.reply_token, TextSendMessage(text=f'❌此功能上鎖中...\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     user_name = get_user_profile(gid, uid)
                     for j in i['group_managers']:
