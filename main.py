@@ -215,8 +215,9 @@ def handle_message(event):
             zodiac_str = '💡[星座]可輸入1~3個字查詢12星座，\n範例輸入1:射\n範例輸入2:巨蟹\n範例輸入3：天蠍座'
             func_str = '💡[功能]可輸入：油價、匯率、星座、天氣\n範例輸入1：油價 開\n範例輸入2：天氣 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
             auth_str = '💡[user]內可標記連續標記\n輸入範例1：新增管理員 @user1 @user2 @user3\n輸入範例2：刪除管理員 @user1 @user2\nps.輸入完新增(或刪除)管理員後，需空一格再開始標記'
+            lotteryImg_str = '💡[卡片]內可輸入：JKF、女郎、奶、大奶、正妹、美女、帥哥、鮮肉，或可直接輸入：隨機抽'
             # lottery_v1 = '請依循步驟：\n1.🔐➛抽獎：此時機器人將請你輸入獎項\n2.🔐➛獎項=[您的獎項]：請連同”獎項=“一併輸入，等號左右不需空白\n3.🔐➛資格名單= [@user]：請連同“資格名單=”一併輸入，等號右側需空一格才能標記\n4.🔐➛開獎人數=[人數]：請連同“開獎人數=”一同輸入，等號左右不需空白\n5.結果將會在20秒後出爐\nps.輸入“抽獎”玩玩看就會囉，屆時機器人會一步步引導~'
-            command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛功能表：可顯示所有查詢功能\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n\n{auth_str}'
+            command = f'【指令集】\n===================\n\n➛：表示指令\n🔐：表示需要權限\n💡：表示額外說明\n\n—————查詢功能—————\n➛功能表：可顯示所有查詢功能\n➛抽[卡片]：隨機給予卡片對應圖\n➛查油價：最新汽油柴油價目\n➛查匯率：最新NTD對外幣匯率\n➛[縣市]：近36hrs天氣預報\n➛[星座]：查詢本日星座運勢\n➛查管理員：列出群內所有管理員\n🔐➛查開關：查看各個功能是開啟或關閉\n\n{lotteryImg_str}\n\n{weather_str}\n\n{zodiac_str}\n\n—————設定功能—————\n🔐➛[功能] 開：打開指定功能\n🔐➛[功能] 關：關閉指定功能\n🔐➛新增管理員 [@user]：提升被標記成員的權限\n🔐➛刪除管理員 [@user]：移除被標記成員的權限\n\n{func_str}\n\n{auth_str}'
             line_bot_api.reply_message(
                 event.reply_token, TextSendMessage(text=command))
 
@@ -473,7 +474,8 @@ def handle_message(event):
                             exchange_ = '👌開啟中' if i['exchange_switch'] == '1' else '❌關閉中'
                             zodiac_ = '👌開啟中' if i['zodiacSigns_switch'] == '1' else '❌關閉中'
                             weather_ = '👌開啟中' if i['weather_switch'] == '1' else '❌關閉中'
-                            res_txt += f'➛查油價 {oil_}\n➛查匯率 {exchange_}\n➛星座運勢 {zodiac_}\n➛天氣預報 {weather_}'
+                            lotteryImg_ = '👌開啟中' if i['lotteryImg_switch'] == '1' else '❌關閉中'
+                            res_txt += f'➛抽卡功能 {lotteryImg_}\n➛查油價 {oil_}\n➛查匯率 {exchange_}\n➛星座運勢 {zodiac_}\n➛天氣預報 {weather_}'
                             line_bot_api.reply_message(
                                 event.reply_token, TextSendMessage(text=res_txt))
                     line_bot_api.reply_message(
