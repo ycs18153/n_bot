@@ -35,15 +35,15 @@ app = Flask(__name__)
 
 # Channel Access Token
 line_bot_api = LineBotApi(
-    '')
+    'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU=')
 # Channel Secret
-handler = WebhookHandler('')
+handler = WebhookHandler('006edd39f89ac911eb9d5fec524457e8')
 
-access_token = ''
+access_token = 'LmPQt9hFiOU9lJNUenKUU9x21/s2Rxu8gd5E/4bwvak6KkpzD3wdy4Ib2idpV4M2jROUMFirlTqZ1Rjj4lT1C33fsr3UEoxjf15bK8VGqShRm40pgObzxAniKpbcAI73qAZWuEZ9I3iuuUbXlmxKagdB04t89/1O/w1cDnyilFU='
 # 監聽所有來自 /callback 的 Post Request
 
 mongoClient = pymongo.MongoClient(
-    "mongodb+srv://<user>:<password>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+    "mongodb+srv://andy:acdwsx321@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 authenticaiton_code_table = groupMagt["authentication_code"]  # 指定資料表
 group_id_table = groupMagt["group_id"]  # 指定資料表
@@ -231,7 +231,7 @@ def handle_message(event):
                     line_bot_api.reply_message(
                         event.reply_token, TextSendMessage(text=command))
 
-        elif "抽JKF" == message or "抽女郎" == message or "抽美女" == message:
+        elif "抽JKF" == message or "抽女郎" == message or "抽美女" == message or "抽正妹" == message or "抽奶" == message or "抽大奶" == message:
             res = group_id_table.find({'_id': gid})
             for i in res:
                 if i['state'] == '0':
@@ -245,11 +245,16 @@ def handle_message(event):
                         tag = 'jkf_girls'
                     elif message == "抽美女":
                         tag = 'beauty_girls'
+                    elif message == "抽正妹":
+                        tag = 'ordinary_person'
+                    elif message == "抽奶" or message == "抽大奶":
+                        tag = 'boost'
                     img_res = images_table.aggregate(
                         [{'$match': {'tag': tag}}, {'$sample': {'size': 1}}])
                     src_txt = ''
                     for j in img_res:
                         src_txt = j['src']
+                    print("img url: ", src_txt)
                     line_bot_api.reply_message(event.reply_token, ImageSendMessage(
                         original_content_url=src_txt, preview_image_url=src_txt))
 
