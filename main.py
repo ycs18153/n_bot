@@ -259,6 +259,7 @@ def handle_message(event):
             src_txt = ''
             for j in img_res:
                 src_txt = j['src']
+            print("img url: ", src_txt)
             line_bot_api.reply_message(event.reply_token, ImageSendMessage(
                 original_content_url=src_txt, preview_image_url=src_txt))
 
