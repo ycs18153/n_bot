@@ -91,7 +91,7 @@ def bot_join(event):
     group_id_table.insert_one({
         '_id': gid,
         'group_name': response['groupName'],
-        'signup_date': str(datetime.date.today()),
+        'signup_date': '',
         'exchange_switch': '1',
         'group_managers': [],
         'oil_switch': '1',
@@ -101,7 +101,7 @@ def bot_join(event):
         'lotteryImg_switch': '1',
         'authentication_code': '',
     })
-    txt = 'SHINE多功能整合型機器人\n如欲開通解鎖請聯絡LINE ID\n[n0715.]———(line)—————'
+    txt = '請輸入「功能表」即可查看機器使用及功能。\n\n如要開通上鎖的功能，請聯繫以下LINE ID:n0715.(一個點)'
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=txt))
 
 
@@ -199,6 +199,10 @@ def handle_message(event):
                             # 將群組管理員
                             group_id_table.update_one({'_id': gid}, {"$push": {
                                 "group_managers": uname}})
+                            # 註冊時間
+                            group_id_table.update_one({'_id': gid}, {
+                                "$set": {"signup_date": str(datetime.date.today())}})
+
                             line_bot_api.reply_message(event.reply_token, TextSendMessage(
                                 text=f'🙌群組註冊成功!\n並已將{uname}設定為本群管理員'))
                     line_bot_api.reply_message(
@@ -213,7 +217,7 @@ def handle_message(event):
         elif 'help' == message or 'Help' == message:
             weather_str = '💡[縣市]需輸入3個字之縣市名稱，提供全台22個行政縣市查詢\n範例輸入1:台北市\n範例輸入2:臺北市\n範例輸入3:新竹縣'
             zodiac_str = '💡[星座]可輸入1~3個字查詢12星座，\n範例輸入1:射\n範例輸入2:巨蟹\n範例輸入3：天蠍座'
-            func_str = '💡[功能]可輸入：油價、匯率、星座、天氣\n範例輸入1：油價 開\n範例輸入2：天氣 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
+            func_str = '💡[功能]可輸入：抽卡、油價、匯率、星座、天氣\n範例輸入1：油價 開\n範例輸入2：天氣 關\nps.輸入完[功能]請空一格再輸入開或關!!!'
             auth_str = '💡[user]內可標記連續標記\n輸入範例1：新增管理員 @user1 @user2 @user3\n輸入範例2：刪除管理員 @user1 @user2\nps.輸入完新增(或刪除)管理員後，需空一格再開始標記'
             lotteryImg_str = '💡[卡片]內可輸入：JKF、女郎、奶、大奶、正妹、美女、帥哥、鮮肉，或可直接輸入：隨機抽'
             # lottery_v1 = '請依循步驟：\n1.🔐➛抽獎：此時機器人將請你輸入獎項\n2.🔐➛獎項=[您的獎項]：請連同”獎項=“一併輸入，等號左右不需空白\n3.🔐➛資格名單= [@user]：請連同“資格名單=”一併輸入，等號右側需空一格才能標記\n4.🔐➛開獎人數=[人數]：請連同“開獎人數=”一同輸入，等號左右不需空白\n5.結果將會在20秒後出爐\nps.輸入“抽獎”玩玩看就會囉，屆時機器人會一步步引導~'
@@ -221,7 +225,7 @@ def handle_message(event):
             line_bot_api.reply_message(
                 event.reply_token, TextSendMessage(text=command))
 
-        elif "抽JKF" == message or "抽女郎" == message or "抽美女" == message or "抽正妹" == message or "抽奶" == message or "抽大奶" == message or "抽帥哥" == message:
+        elif "抽JKF" == message or "抽女郎" == message or "抽美女" == message or "抽正妹" == message or "抽奶" == message or "抽大奶" == message or "抽帥哥" == message or "抽鮮肉" == message:
             res = group_id_table.find({'_id': gid})
             for i in res:
                 if i['state'] == '0':
@@ -245,6 +249,8 @@ def handle_message(event):
                             tag = 'boost'
                         elif message == "抽帥哥":
                             tag = 'hansome'
+                        elif message == "抽鮮肉":
+                            tag = 'young_man'
                         img_res = images_table.aggregate(
                             [{'$match': {'tag': tag}}, {'$sample': {'size': 1}}])
                         src_txt = ''
@@ -310,8 +316,26 @@ def handle_message(event):
             res = group_id_table.find({'_id': gid})
             for i in res:
                 if i['state'] == '0':
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'❌機器人尚未激活\n請先向官方取得授權碼'))
+                    random_list = []
+                    random_chioces = zodiac_sign_table.find({'_id': '12'})
+                    for ran in random_chioces:
+                        random_list = ran['today_available_zodiac']
+                    key = [int(k) for k, v in zodiacSigns_dict.items()
+                           if message in v]
+                    random_zodiacSigns_res = ''
+                    if str(key[0]) in random_list:
+                        zodiacSigns_obj = zodiac_sign_table.find(
+                            {'_id': str(key[0])})
+                        for ran_r in zodiacSigns_obj:
+                            random_zodiacSigns_res = ran_r['res']
+                        line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                            text=f'{random_zodiacSigns_res}'))
+                    else:
+                        except_message = ''
+                        for j in random_list:
+                            except_message += f'{zodiacSigns_dict[int(j)][0]} '
+                        line_bot_api.reply_message(
+                            event.reply_token, TextSendMessage(text=f'❌由於群組未授權，所以每天只隨機開放三個星座供查詢ㄛ～\n🔥今日開放：{except_message}\n完整功能請向作者購買授權碼🙏\nLINE ID:n0715.(一個點)'))
                 else:
                     if i['zodiacSigns_switch'] == '0':
                         line_bot_api.reply_message(event.reply_token, TextSendMessage(
@@ -609,7 +633,7 @@ template_message = {
         "contents": [
             {
                 "type": "text",
-                "text": "SHINE多功能整合機器人\n如有異常問題請回報作者",
+                "text": "SHINE多功能整合型機器人\n如欲開通解鎖請聯絡LINE ID\n[n0715.]———LINE—————",
                 "weight": "regular",
                 "color": "#1DB666",
                 "size": "md",
@@ -920,7 +944,7 @@ template_message = {
                                 "action": {
                                     "type": "message",
                                     "label": "水瓶座",
-                                    "text": "hello"
+                                    "text": "水瓶座"
                                 },
                                 "style": "secondary",
                                 "height": "sm",

@@ -4,13 +4,14 @@ import datetime
 import pymongo
 from pymongo import MongoClient
 import certifi
+import random
 
 '''
 This file is for Google Cloud Scheduler.
 '''
 
 mongoClient = pymongo.MongoClient(
-    "mongodb+srv://<user>:<password>@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
+    "mongodb+srv://andy:acdwsx321@groupmagt.cgjzv3a.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=certifi.where())  # 要連結到的 connect string
 groupMagt = mongoClient["groupMagt"]  # 指定資料庫
 zodiac_sign_table = groupMagt["zodiac_sign"]  # 指定資料表
 
@@ -65,7 +66,24 @@ def zodiacSigns(key):
     return res
 
 
+def randomChioce():
+    lst = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']
+    res = random.sample(lst, 3)
+
+    zodiac_sign_table.update_many(
+        {"_id": "12"},
+        {
+            "$set": {
+                "today_available_zodiac.0": res[0],
+                "today_available_zodiac.1": res[1],
+                "today_available_zodiac.2": res[2],
+            }
+        }
+    )
+
+
 def main():
+    randomChioce()
     for i in range(12):
         res = ''
         res = zodiacSigns(i)
