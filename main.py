@@ -420,8 +420,6 @@ def handle_message(event):
                                     gid, open_close, 'lotteryImg_switch', record)
                             line_bot_api.reply_message(
                                 event.reply_token, TextSendMessage(text=return_res))
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
 
         elif '新增管理員' in message:
             res = group_id_table.find({'_id': gid})
@@ -449,8 +447,6 @@ def handle_message(event):
                                     managers_res += f'{j}. {i.rstrip()}\n'
                                 line_bot_api.reply_message(
                                     event.reply_token, TextSendMessage(text=managers_res))
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
 
         elif '刪除管理員' in message:
             res = group_id_table.find({'_id': gid})
@@ -480,8 +476,6 @@ def handle_message(event):
                                     managers_res += f'{j}. {i.rstrip()}\n'
                                 line_bot_api.reply_message(
                                     event.reply_token, TextSendMessage(text=managers_res))
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
 
         elif '查開關' == message:
             res = group_id_table.find({'_id': gid})
@@ -502,8 +496,6 @@ def handle_message(event):
                             res_txt += f'➛抽卡功能 {lotteryImg_}\n➛查油價 {oil_}\n➛查匯率 {exchange_}\n➛星座運勢 {zodiac_}\n➛天氣預報 {weather_}'
                             line_bot_api.reply_message(
                                 event.reply_token, TextSendMessage(text=res_txt))
-                    line_bot_api.reply_message(
-                        event.reply_token, TextSendMessage(text=f'⚠️沒有權限'))
 
         else:
             print('else detect!!!!!!!!!')
